@@ -28,5 +28,5 @@ pub fn main() !void {
 
     try instructions.init_operations(&operations_local, &local_stack);
 
-    try parse("100 dup / .");
+    try parse("100 dup / drop");
 }
