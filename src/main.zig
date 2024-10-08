@@ -25,7 +25,7 @@ const Word = enum(i32) {
     }
 };
 
-pub fn parse(line: []const u8) !void {
+fn parse(line: []const u8) !void {
     var it = std.mem.split(u8, line, " ");
     while (it.next()) |word| {
         if (operations.*.get(word)) |op| {
