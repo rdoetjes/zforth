@@ -3,9 +3,9 @@ var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 pub const OpFunction = *const fn () anyerror!void;
 
-var stack: *std.ArrayList(i32) = undefined;
+var stack: *std.ArrayList(f32) = undefined;
 
-pub fn init_operations(operations: *std.StringHashMap(OpFunction), local_stack: *std.ArrayList(i32)) !void {
+pub fn init_operations(operations: *std.StringHashMap(OpFunction), local_stack: *std.ArrayList(f32)) !void {
     stack = local_stack;
     try operations.put("+", plus);
     try operations.put("-", minus);
@@ -36,7 +36,7 @@ pub fn mul() !void {
 pub fn div() !void {
     const a = stack.*.pop();
     const b = stack.*.pop();
-    try stack.*.append(@divFloor(b, a));
+    try stack.*.append(b / a);
 }
 
 pub fn dot_s() !void {

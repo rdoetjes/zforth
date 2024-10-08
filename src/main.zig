@@ -4,8 +4,7 @@ var gpa_alloc = gpa.allocator();
 const instructions = @import("instructions.zig");
 
 var operations: *std.StringHashMap(instructions.OpFunction) = undefined;
-
-var stack: *std.ArrayList(i32) = undefined;
+var stack: *std.ArrayList(f32) = undefined;
 
 const Word = enum(i32) {
     int,
@@ -32,13 +31,13 @@ pub fn parse(line: []const u8) !void {
         if (operations.*.get(word)) |op| {
             try op();
         } else {
-            try stack.*.append(try std.fmt.parseInt(i32, word, 10));
+            try stack.*.append(try std.fmt.parseFloat(f32, word));
         }
     }
 }
 
 pub fn main() !void {
-    var local_stack = std.ArrayList(i32).init(gpa_alloc);
+    var local_stack = std.ArrayList(f32).init(gpa_alloc);
     defer local_stack.deinit();
     stack = &local_stack;
 
@@ -48,5 +47,5 @@ pub fn main() !void {
 
     try instructions.init_operations(&operations_local, &local_stack);
 
-    try parse("-5 6 - .");
+    try parse("5 5 * .");
 }
