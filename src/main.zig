@@ -9,12 +9,15 @@ var stack: *std.ArrayList(f32) = undefined;
 fn parse(line: []const u8) !void {
     var it = std.mem.split(u8, line, " ");
     while (it.next()) |word| {
-        const lower_word = std.ascii.lowerString(word);
+        const lower_word = try gpa_alloc.alloc(u8, word.len);
+        _ = std.ascii.lowerString(lower_word, word);
+
         if (operations.*.get(lower_word)) |op| {
             try op();
         } else {
             try stack.*.append(try std.fmt.parseFloat(f32, word));
         }
+        gpa_alloc.free(lower_word);
     }
 }
 
@@ -29,5 +32,5 @@ pub fn main() !void {
 
     try instructions.init_operations(&operations_local, &local_stack);
 
-    try parse("100 dup / drop");
+    try parse("100 DUP / .S dRoP");
 }
