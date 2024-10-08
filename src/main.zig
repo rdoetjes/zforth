@@ -47,5 +47,5 @@ pub fn main() !void {
 
     try instructions.init_operations(&operations_local, &local_stack);
 
-    try parse("5 5 * .");
+    try parse("100 3 / .");
 }
