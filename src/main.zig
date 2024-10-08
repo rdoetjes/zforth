@@ -1,13 +1,11 @@
 const std = @import("std");
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
+const instructions = @import("instructions.zig");
+
+var operations: *std.StringHashMap(instructions.OpFunction) = undefined;
 
 var stack: *std.ArrayList(i32) = undefined;
-// Define the function pointer type
-const OpFunction = *const fn () error{OutOfMemory}!void;
-
-// Create the HashMap
-var operations: *std.StringHashMap(OpFunction) = undefined;
 
 const Word = enum(i32) {
     int,
@@ -28,38 +26,6 @@ const Word = enum(i32) {
     }
 };
 
-fn minus() !void {
-    const a = stack.*.pop();
-    const b = stack.*.pop();
-    try stack.*.append(b - a);
-}
-
-fn plus() !void {
-    const a = stack.*.pop();
-    const b = stack.*.pop();
-    try stack.*.append(a + b);
-}
-
-fn mul() !void {
-    const a = stack.*.pop();
-    const b = stack.*.pop();
-    try stack.*.append(a * b);
-}
-
-fn div() !void {
-    const a = stack.*.pop();
-    const b = stack.*.pop();
-    try stack.*.append(@divFloor(b, a));
-}
-fn dot_s() !void {
-    std.debug.print("{d} ", .{stack.*.items[stack.*.items.len - 1]});
-}
-
-fn dot() !void {
-    const a = stack.*.pop();
-    std.debug.print("{d}\n", .{a});
-}
-
 pub fn parse(line: []const u8) !void {
     var it = std.mem.split(u8, line, " ");
     while (it.next()) |word| {
@@ -74,19 +40,13 @@ pub fn parse(line: []const u8) !void {
 pub fn main() !void {
     var local_stack = std.ArrayList(i32).init(gpa_alloc);
     defer local_stack.deinit();
-
-    var operations_local = std.StringHashMap(OpFunction).init(gpa_alloc);
-    defer operations.deinit();
-
-    operations = &operations_local;
-    try operations.put("+", plus);
-    try operations.put("-", minus);
-    try operations.put(".", dot);
-    try operations.put(".s", dot_s);
-    try operations.put("*", mul);
-    try operations.put("/", div);
-
     stack = &local_stack;
+
+    var operations_local = std.StringHashMap(instructions.OpFunction).init(gpa_alloc);
+    defer operations_local.deinit();
+    operations = &operations_local;
+
+    try instructions.init_operations(&operations_local, &local_stack);
 
     try parse("-5 6 - .");
 }
