@@ -13,6 +13,7 @@ pub fn init_operations(operations: *std.StringHashMap(OpFunction), local_stack: 
     try operations.put(".s", dot_s);
     try operations.put("*", mul);
     try operations.put("/", div);
+    try operations.put("dup", dup);
 }
 
 pub fn minus() !void {
@@ -46,4 +47,10 @@ pub fn dot_s() !void {
 pub fn dot() !void {
     const a = stack.*.pop();
     std.debug.print("{d}\n", .{a});
+}
+
+pub fn dup() !void {
+    const a = stack.*.pop();
+    try stack.*.append(a);
+    try stack.*.append(a);
 }
