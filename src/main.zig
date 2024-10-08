@@ -9,7 +9,8 @@ var stack: *std.ArrayList(f32) = undefined;
 fn parse(line: []const u8) !void {
     var it = std.mem.split(u8, line, " ");
     while (it.next()) |word| {
-        if (operations.*.get(word)) |op| {
+        const lower_word = std.ascii.lowerString(word);
+        if (operations.*.get(lower_word)) |op| {
             try op();
         } else {
             try stack.*.append(try std.fmt.parseFloat(f32, word));
