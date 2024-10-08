@@ -6,25 +6,6 @@ const instructions = @import("instructions.zig");
 var operations: *std.StringHashMap(instructions.OpFunction) = undefined;
 var stack: *std.ArrayList(f32) = undefined;
 
-const Word = enum(i32) {
-    int,
-    plus,
-    minus,
-    dot_s,
-    dot,
-    star,
-
-    pub fn toString(self: Word) []const u8 {
-        return switch (self) {
-            .plus => "+",
-            .minus => "-",
-            .dot_s => ".s",
-            .dot => ".",
-            .star => "*",
-        };
-    }
-};
-
 fn parse(line: []const u8) !void {
     var it = std.mem.split(u8, line, " ");
     while (it.next()) |word| {
