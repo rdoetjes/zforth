@@ -41,5 +41,5 @@ pub fn main() !void {
 
     try instructions.init_operations(&operations_local, &local_stack);
 
-    try parse("2 100 DUP / 3 swap / .S .s");
+    try parse("25 sqrt .");
 }
