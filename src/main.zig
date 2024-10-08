@@ -9,6 +9,14 @@ var stack: *std.ArrayList(f32) = undefined;
 fn parse(line: []const u8) !void {
     var it = std.mem.split(u8, line, " ");
     while (it.next()) |word| {
+        //this is the only situation where we use a capitalized word, the rest can be any case
+        if (std.mem.eql(u8, word, ".S")) {
+            if (operations.*.get(word)) |op| {
+                try op();
+            }
+            continue;
+        }
+
         const lower_word = try gpa_alloc.alloc(u8, word.len);
         _ = std.ascii.lowerString(lower_word, word);
 
@@ -17,6 +25,7 @@ fn parse(line: []const u8) !void {
         } else {
             try stack.*.append(try std.fmt.parseFloat(f32, word));
         }
+
         gpa_alloc.free(lower_word);
     }
 }
@@ -32,5 +41,5 @@ pub fn main() !void {
 
     try instructions.init_operations(&operations_local, &local_stack);
 
-    try parse("100 DUP / .S dRoP");
+    try parse("2 100 DUP / 3 swap / .S .s");
 }

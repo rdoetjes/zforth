@@ -11,10 +11,12 @@ pub fn init_operations(operations: *std.StringHashMap(OpFunction), local_stack: 
     try operations.put("-", minus);
     try operations.put(".", dot);
     try operations.put(".s", dot_s);
+    try operations.put(".S", dot_cap_s);
     try operations.put("*", mul);
     try operations.put("/", div);
     try operations.put("dup", dup);
     try operations.put("drop", drop);
+    try operations.put("swap", swap);
 }
 
 pub fn minus() !void {
@@ -42,7 +44,15 @@ pub fn div() !void {
 }
 
 pub fn dot_s() !void {
-    std.debug.print("{d} ", .{stack.*.items[stack.*.items.len - 1]});
+    std.debug.print(".s <1> {d}\n", .{stack.*.items[stack.*.items.len - 1]});
+}
+
+pub fn dot_cap_s() !void {
+    std.debug.print(".S <{d}> ", .{stack.*.items.len});
+    for (stack.*.items) |item| {
+        std.debug.print("{d} ", .{item});
+    }
+    std.debug.print("\n", .{});
 }
 
 pub fn dot() !void {
@@ -58,4 +68,11 @@ pub fn dup() !void {
 
 pub fn drop() !void {
     _ = stack.*.pop();
+}
+
+pub fn swap() !void {
+    const a = stack.*.pop();
+    const b = stack.*.pop();
+    try stack.*.append(a);
+    try stack.*.append(b);
 }
