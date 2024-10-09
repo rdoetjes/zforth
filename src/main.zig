@@ -25,18 +25,10 @@ fn parse(line: []const u8) !void {
         start_index = result[0].*;
         const word = result[1];
 
-        //this is the only situation where we use a capitalized word, the rest can be any case
-        if (std.mem.eql(u8, word, ".S")) {
-            if (system_words.*.get(word)) |op| {
-                try op();
-                continue;
-            }
-        }
+        const pruned_input = try gpa_alloc.alloc(u8, word.len);
+        if (!std.mem.eql(u8, word, ".S")) _ = std.ascii.lowerString(pruned_input, word) else _ = std.mem.copyForwards(u8, pruned_input, word);
 
-        const lower_word = try gpa_alloc.alloc(u8, word.len);
-        _ = std.ascii.lowerString(lower_word, word);
-
-        if (system_words.*.get(lower_word)) |op| {
+        if (system_words.*.get(pruned_input)) |op| {
             const op_struct = try gpa_alloc.create(instructions.Op);
             op_struct.*.op = op;
             try op_stack.*.append(op_struct);
@@ -44,7 +36,7 @@ fn parse(line: []const u8) !void {
             try arg_stack.*.append(try std.fmt.parseFloat(f32, word));
         }
 
-        gpa_alloc.free(lower_word);
+        gpa_alloc.free(pruned_input);
     }
 }
 
@@ -74,6 +66,6 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    try parse("25 25 * .S");
+    try parse("25 25 .S * .s");
     try compile();
 }
