@@ -26,6 +26,7 @@ fn parse(line: []const u8) !void {
         const word = result[1];
 
         const pruned_input = try gpa_alloc.alloc(u8, word.len);
+        defer gpa_alloc.free(pruned_input);
         if (!std.mem.eql(u8, word, ".S")) _ = std.ascii.lowerString(pruned_input, word) else _ = std.mem.copyForwards(u8, pruned_input, word);
 
         if (system_words.*.get(pruned_input)) |op| {
@@ -35,8 +36,6 @@ fn parse(line: []const u8) !void {
         } else {
             try arg_stack.*.append(try std.fmt.parseFloat(f32, word));
         }
-
-        gpa_alloc.free(pruned_input);
     }
 }
 
