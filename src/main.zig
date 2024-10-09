@@ -97,9 +97,9 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    try parse(": test dup * ;");
-    try parse(": test 4 * ;");
-    try parse(".S 5 test .S");
+    try parse(": squared dup * ;");
+    try parse("4 squared .");
+    try parse("3 squared .");
 
     try compile();
 }
