@@ -3,7 +3,7 @@ var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 const instructions = @import("instructions.zig");
 
-var operations: *std.StringHashMap(instructions.OpFunction) = undefined;
+var system_words: *std.StringHashMap(instructions.OpFunction) = undefined;
 
 var arg_stack: *std.ArrayList(f32) = undefined;
 var op_stack: *std.ArrayList(*instructions.Op) = undefined;
@@ -27,7 +27,7 @@ fn parse(line: []const u8) !void {
 
         //this is the only situation where we use a capitalized word, the rest can be any case
         if (std.mem.eql(u8, word, ".S")) {
-            if (operations.*.get(word)) |op| {
+            if (system_words.*.get(word)) |op| {
                 try op();
                 continue;
             }
@@ -36,7 +36,7 @@ fn parse(line: []const u8) !void {
         const lower_word = try gpa_alloc.alloc(u8, word.len);
         _ = std.ascii.lowerString(lower_word, word);
 
-        if (operations.*.get(lower_word)) |op| {
+        if (system_words.*.get(lower_word)) |op| {
             const op_struct = try gpa_alloc.create(instructions.Op);
             op_struct.*.op = op;
             try op_stack.*.append(op_struct);
@@ -70,7 +70,7 @@ pub fn main() !void {
 
     var l_operations_local = std.StringHashMap(instructions.OpFunction).init(gpa_alloc);
     defer l_operations_local.deinit();
-    operations = &l_operations_local;
+    system_words = &l_operations_local;
 
     try instructions.init_operations(&l_operations_local, &l_arg_stack);
 
