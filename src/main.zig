@@ -17,6 +17,7 @@ fn get_word(start_index: *usize, line: []const u8) !struct { *usize, []const u8 
     start_index.* += 1;
     return .{ start_index, line[start_pos .. start_index.* - 1] };
 }
+
 fn parse(line: []const u8) !void {
     var start_index: usize = 0;
     //this allows us to skip forward to closing parens by altering the start_index
@@ -27,7 +28,23 @@ fn parse(line: []const u8) !void {
 
         const pruned_input = try gpa_alloc.alloc(u8, word.len);
         defer gpa_alloc.free(pruned_input);
+
         if (!std.mem.eql(u8, word, ".S")) _ = std.ascii.lowerString(pruned_input, word) else _ = std.mem.copyForwards(u8, pruned_input, word);
+
+        if (word.len > 0 and word[0] == ':') {
+            const dictionary_result = try get_word(&start_index, line);
+            start_index = dictionary_result[0].*;
+            const new_word = dictionary_result[1];
+            std.debug.print("{s}", .{new_word});
+            while (start_index <= line.len - 1 and line[start_index] != ';') {
+                const word_ops_result = try get_word(&start_index, line);
+                start_index = word_ops_result[0].*;
+                const word_ops = word_ops_result[1];
+                std.debug.print(">{s}< \n", .{word_ops});
+            }
+            start_index += 2;
+            continue;
+        }
 
         if (system_words.*.get(pruned_input)) |op| {
             const op_struct = try gpa_alloc.create(instructions.Op);
@@ -65,6 +82,6 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    try parse("25 25 .S * .s");
+    try parse(": test 25 dup * . ; 25 3 * .S");
     try compile();
 }
