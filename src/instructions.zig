@@ -10,9 +10,9 @@ pub const Op = struct {
     op: OpFunction,
 };
 
-pub fn init_operations(l_operations: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32)) !void {
+pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32)) !void {
     arg_stack = l_arg_stack;
-    operations = l_operations;
+    operations = l_system_words;
     try operations.put("+", plus);
     try operations.put("-", minus);
     try operations.put(".", dot);
