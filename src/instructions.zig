@@ -17,7 +17,7 @@ pub fn init_operations(operations: *std.StringHashMap(OpFunction), local_stack: 
     try operations.put("dup", dup);
     try operations.put("drop", drop);
     try operations.put("swap", swap);
-    try operations.put("sqrt", sqrt);
+    try operations.put("sqr", sqrt);
 }
 
 pub fn minus() !void {
@@ -81,4 +81,8 @@ pub fn swap() !void {
 pub fn sqrt() !void {
     const a = stack.*.pop();
     try stack.*.append(std.math.sqrt(a));
+}
+
+pub fn print(a: []const u8) !void {
+    std.debug.print("{s}", .{a});
 }
