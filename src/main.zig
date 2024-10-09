@@ -68,11 +68,11 @@ pub fn main() !void {
     defer l_op_stack.deinit();
     op_stack = &l_op_stack;
 
-    var l_operations_local = std.StringHashMap(instructions.OpFunction).init(gpa_alloc);
-    defer l_operations_local.deinit();
-    system_words = &l_operations_local;
+    var l_system_words = std.StringHashMap(instructions.OpFunction).init(gpa_alloc);
+    defer l_system_words.deinit();
+    system_words = &l_system_words;
 
-    try instructions.init_operations(&l_operations_local, &l_arg_stack);
+    try instructions.init_operations(&l_system_words, &l_arg_stack);
 
     try parse("25 25 * .S");
     try compile();
