@@ -4,8 +4,9 @@ var gpa_alloc = gpa.allocator();
 const instructions = @import("instructions.zig");
 
 var operations: *std.StringHashMap(instructions.OpFunction) = undefined;
-var stack: *std.ArrayList(f32) = undefined;
-var pstack: *std.ArrayList(f32) = undefined;
+
+var arg_stack: *std.ArrayList(f32) = undefined;
+var op_stack: *std.ArrayList(*instructions.Op) = undefined;
 
 fn get_word(start_index: *usize, line: []const u8) !struct { *usize, []const u8 } {
     const start_pos = start_index.*;
@@ -41,24 +42,30 @@ fn parse(line: []const u8) !void {
         _ = std.ascii.lowerString(lower_word, word);
 
         if (operations.*.get(lower_word)) |op| {
-            try op();
+            op = gpa_alloc.create(instructions) catch unreachable;
+            op.*.op = op;
+            try op_stack.*.append(op);
         } else {
-            try stack.*.append(try std.fmt.parseFloat(f32, word));
+            try arg_stack.*.append(try std.fmt.parseFloat(f32, word));
         }
 
         gpa_alloc.free(lower_word);
     }
 }
 pub fn main() !void {
-    var local_stack = std.ArrayList(f32).init(gpa_alloc);
-    defer local_stack.deinit();
-    stack = &local_stack;
+    var l_arg_stack = std.ArrayList(f32).init(gpa_alloc);
+    defer l_arg_stack.deinit();
+    arg_stack = &l_arg_stack;
 
-    var operations_local = std.StringHashMap(instructions.OpFunction).init(gpa_alloc);
+    var l_op_stack = std.ArrayList(instructions.Op).init(gpa_alloc);
+    defer l_op_stack.deinit();
+    op_stack = &l_op_stack;
+
+    var operations_local: std.StringHashMap(instructions.OpFunction) = undefined;
     defer operations_local.deinit();
     operations = &operations_local;
 
-    try instructions.init_operations(&operations_local, &local_stack);
+    try instructions.init_operations(&operations_local, &l_arg_stack);
 
     try parse("25 25 * .s :test dup * ;");
 }

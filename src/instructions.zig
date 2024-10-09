@@ -2,11 +2,18 @@ const std = @import("std");
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 pub const OpFunction = *const fn () anyerror!void;
+var operations *std.StringHashMap(OpFunction) = undefined;
+var arg_stack: *std.ArrayList(f32) = undefined;
 
-var stack: *std.ArrayList(f32) = undefined;
+pub const Op = struct {
+    words: []const u8,
+    op: OpFunction,
+};
 
-pub fn init_operations(operations: *std.StringHashMap(OpFunction), local_stack: *std.ArrayList(f32)) !void {
-    stack = local_stack;
+pub fn init_operations(operations: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32)) !void {
+    arg_stack = l_arg_stack;
+    operations = operations;
+    try operations.put("push", plus);
     try operations.put("+", plus);
     try operations.put("-", minus);
     try operations.put(".", dot);
