@@ -26,7 +26,6 @@ fn init_system_words() !void {
     try system_words.put(".s", instructions.dot_s);
     try system_words.put(".S", instructions.dot_cap_s);
     try system_words.put("*", instructions.mul);
-    try system_words.put(".\"", instructions.print);
     try system_words.put("cr", instructions.cr);
     try system_words.put("/", instructions.div);
     try system_words.put("dup", instructions.dup);
@@ -38,6 +37,7 @@ fn init_system_words() !void {
 
 fn init_compile_words() !void {
     try compile_words.put("do", instructions.do);
+    try system_words.put(".\"", instructions.print);
 }
 
 pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32), l_op_stack: *std.ArrayList(*Op), l_my_words: *std.StringHashMap(*Op), l_compile_words: *std.StringHashMap(OpFunction)) !void {
