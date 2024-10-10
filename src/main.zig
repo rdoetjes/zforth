@@ -5,10 +5,6 @@ const interpreter = @import("interpreter.zig");
 const outw = std.io.getStdOut().writer();
 const inr = std.io.getStdIn().reader();
 
-var system_words: *std.StringHashMap(interpreter.OpFunction) = undefined;
-var my_words: *std.StringHashMap(*interpreter.Op) = undefined;
-
-var arg_stack: *std.ArrayList(f32) = undefined;
 var op_stack: *std.ArrayList(*interpreter.Op) = undefined;
 
 fn prompt() void {
@@ -57,8 +53,6 @@ fn repl() void {
 pub fn main() !void {
     var l_arg_stack = std.ArrayList(f32).init(gpa_alloc);
     defer l_arg_stack.deinit();
-    arg_stack = &l_arg_stack;
-    arg_stack.*.clearRetainingCapacity();
 
     var l_op_stack = std.ArrayList(*interpreter.Op).init(gpa_alloc);
     defer l_op_stack.deinit();
@@ -67,13 +61,14 @@ pub fn main() !void {
 
     var l_my_words = std.StringHashMap(*interpreter.Op).init(gpa_alloc);
     defer l_my_words.deinit();
-    my_words = &l_my_words;
 
     var l_system_words = std.StringHashMap(interpreter.OpFunction).init(gpa_alloc);
     defer l_system_words.deinit();
-    system_words = &l_system_words;
 
-    try interpreter.init_operations(&l_system_words, &l_arg_stack, &l_op_stack, &l_my_words);
+    var l_compile_words = std.StringHashMap(interpreter.OpFunction).init(gpa_alloc);
+    defer l_compile_words.deinit();
+
+    try interpreter.init_operations(&l_system_words, &l_arg_stack, &l_op_stack, &l_my_words, &l_compile_words);
 
     repl();
 }

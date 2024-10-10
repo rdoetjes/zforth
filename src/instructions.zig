@@ -1,6 +1,7 @@
 const std = @import("std");
 pub var arg_stack: *std.ArrayList(f32) = undefined;
 const outw = std.io.getStdOut().writer();
+const interpreter = @import("interpreter.zig");
 
 fn pop() !f32 {
     if (arg_stack.*.items.len == 0) {
@@ -8,6 +9,14 @@ fn pop() !f32 {
     }
 
     return arg_stack.*.pop();
+}
+
+pub fn do(code: []const u8) !void {
+    const a: usize = @floatFromInt(try pop());
+    const b: usize = @floatFromInt(try pop());
+    for (a..b) |_| {
+        interpreter.parse(code);
+    }
 }
 
 pub fn minus(_: []const u8) !void {

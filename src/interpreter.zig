@@ -3,6 +3,7 @@ var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 
 var system_words: *std.StringHashMap(OpFunction) = undefined;
+var compile_words: *std.StringHashMap(OpFunction) = undefined;
 var my_words: *std.StringHashMap(*Op) = undefined;
 
 var arg_stack: *std.ArrayList(f32) = undefined;
@@ -32,11 +33,16 @@ fn init_system_words() !void {
     try system_words.put("sqr", instructions.sqrt);
 }
 
-pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32), l_op_stack: *std.ArrayList(*Op), l_my_words: *std.StringHashMap(*Op)) !void {
+fn init_compile_words() !void {
+    try compile_words.put("do", instructions.do);
+}
+
+pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32), l_op_stack: *std.ArrayList(*Op), l_my_words: *std.StringHashMap(*Op), l_compile_words: *std.StringHashMap(OpFunction)) !void {
     arg_stack = l_arg_stack;
     system_words = l_system_words;
     op_stack = l_op_stack;
     my_words = l_my_words;
+    compile_words = l_compile_words;
     instructions.arg_stack = l_arg_stack;
 
     try init_system_words();
