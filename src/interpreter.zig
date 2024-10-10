@@ -141,10 +141,15 @@ pub fn parse(line: []const u8) !void {
 
         if (std.mem.eql(u8, word, ".\"")) {
             handle_print_word(line, &start_index);
+            if (start_index < line.len) {
+                try parse(line[start_index..]);
+                break;
+            }
         } else if (system_words.*.get(pruned_input)) |op| {
             handle_system_word(op, "");
         } else if (my_words.*.get(pruned_input)) |op| {
             try parse(op.*.words);
+            break;
         } else {
             handle_stack_value(pruned_input);
         }

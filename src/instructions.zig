@@ -60,7 +60,7 @@ pub fn dot_cap_s(_: []const u8) !void {
 
 pub fn dot(_: []const u8) !void {
     const a = try pop();
-    try outw.print("{d}\n", .{a});
+    try outw.print("{d}", .{a});
 }
 
 pub fn dup(_: []const u8) !void {
