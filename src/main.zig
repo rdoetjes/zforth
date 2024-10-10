@@ -104,7 +104,6 @@ fn compile() !void {
             try parse(op.*.words);
             try compile();
         }
-        std.debug.print("word:2 \n", .{});
         gpa_alloc.destroy(op);
     }
     op_stack.*.clearRetainingCapacity();
