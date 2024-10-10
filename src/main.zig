@@ -14,7 +14,7 @@ fn prompt() void {
 }
 
 fn welcome() void {
-    outw.print("small lean forth in zig\n", .{}) catch {
+    outw.print("Small lean forth in zig\n", .{}) catch {
         std.debug.print("failed to print welcome", .{});
     };
 }
