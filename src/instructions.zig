@@ -4,15 +4,17 @@ var gpa_alloc = gpa.allocator();
 var operations: *std.StringHashMap(OpFunction) = undefined;
 var arg_stack: *std.ArrayList(f32) = undefined;
 
-pub const OpFunction = *const fn () anyerror!void;
+pub const OpFunction = *const fn ([]const u8) anyerror!void;
 pub const Op = struct {
     words: []const u8,
     op: OpFunction,
+    arg: []const u8,
 };
 
 pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32)) !void {
     arg_stack = l_arg_stack;
     operations = l_system_words;
+    try operations.put("push", push);
     try operations.put("+", plus);
     try operations.put("-", minus);
     try operations.put(".", dot);
@@ -26,35 +28,36 @@ pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_sta
     try operations.put("sqr", sqrt);
 }
 
-pub fn minus() !void {
+pub fn minus(_: []const u8) !void {
     const a = arg_stack.*.pop();
     const b = arg_stack.*.pop();
     try arg_stack.*.append(b - a);
 }
 
-pub fn plus() !void {
+pub fn plus(_: []const u8) !void {
     const a = arg_stack.*.pop();
     const b = arg_stack.*.pop();
     try arg_stack.*.append(a + b);
 }
 
-pub fn mul() !void {
+pub fn mul(_: []const u8) !void {
     const a = arg_stack.*.pop();
     const b = arg_stack.*.pop();
+    std.debug.print("mul {d} {d}\n", .{ a, b });
     try arg_stack.*.append(a * b);
 }
 
-pub fn div() !void {
+pub fn div(_: []const u8) !void {
     const a = arg_stack.*.pop();
     const b = arg_stack.*.pop();
     try arg_stack.*.append(b / a);
 }
 
-pub fn dot_s() !void {
+pub fn dot_s(_: []const u8) !void {
     std.debug.print(".s <1> {d}\n", .{arg_stack.*.items[arg_stack.*.items.len - 1]});
 }
 
-pub fn dot_cap_s() !void {
+pub fn dot_cap_s(_: []const u8) !void {
     std.debug.print(".S <{d}> ", .{arg_stack.*.items.len});
     for (arg_stack.*.items) |item| {
         std.debug.print("{d} ", .{item});
@@ -62,33 +65,41 @@ pub fn dot_cap_s() !void {
     std.debug.print("\n", .{});
 }
 
-pub fn dot() !void {
+pub fn dot(_: []const u8) !void {
     const a = arg_stack.*.pop();
     std.debug.print("{d}\n", .{a});
 }
 
-pub fn dup() !void {
+pub fn dup(_: []const u8) !void {
     const a = arg_stack.*.pop();
     try arg_stack.*.append(a);
     try arg_stack.*.append(a);
 }
 
-pub fn drop() !void {
+pub fn drop(_: []const u8) !void {
     _ = arg_stack.*.pop();
 }
 
-pub fn swap() !void {
+pub fn swap(_: []const u8) !void {
     const a = arg_stack.*.pop();
     const b = arg_stack.*.pop();
     try arg_stack.*.append(a);
     try arg_stack.*.append(b);
 }
 
-pub fn sqrt() !void {
+pub fn sqrt(_: []const u8) !void {
     const a = arg_stack.*.pop();
     try arg_stack.*.append(std.math.sqrt(a));
 }
 
 pub fn print(a: []const u8) !void {
     std.debug.print("{s}", .{a});
+}
+
+pub fn push(a: []const u8) !void {
+    const value = std.fmt.parseFloat(f32, a) catch {
+        return error.Invalid_Number;
+    };
+
+    try arg_stack.*.append(value);
 }

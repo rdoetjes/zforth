@@ -56,11 +56,16 @@ fn parse(line: []const u8) !void {
         if (system_words.*.get(pruned_input)) |op| {
             const op_struct = try gpa_alloc.create(instructions.Op);
             op_struct.*.op = op;
+            const none_str = "";
+            op_struct.*.arg = try gpa_alloc.dupe(u8, none_str);
             try op_stack.*.append(op_struct);
         } else if (my_words.*.get(pruned_input)) |op| {
             try parse(op.*.words);
         } else {
-            try arg_stack.*.append(try std.fmt.parseFloat(f32, word));
+            const op_struct = try gpa_alloc.create(instructions.Op);
+            op_struct.*.op = instructions.push;
+            op_struct.*.arg = try gpa_alloc.dupe(u8, pruned_input);
+            try op_stack.*.append(op_struct);
         }
     }
 }
@@ -68,11 +73,13 @@ fn parse(line: []const u8) !void {
 fn compile() !void {
     for (op_stack.items) |op| {
         if (op.*.op != undefined) {
-            try op.*.op();
+            try op.*.op(op.*.arg);
+            gpa_alloc.free(op.*.arg);
         } else if (op.*.words.len > 0) {
             try parse(op.*.words);
             try compile();
         }
+        gpa_alloc.destroy(op);
     }
 }
 
@@ -97,9 +104,14 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    try parse(": squared dup * ;");
-    try parse("4 squared .");
-    try parse("3 squared .");
+    try parse(": two 23 ;");
+    try parse(": three 3 ;");
+    try parse(": times * ;");
+    try parse(": six two three - ;");
+    try parse("six");
+    try parse("5 6 7 8");
+    try parse("9 10 11 12");
+    try parse("two .S");
 
     try compile();
 }
