@@ -36,6 +36,21 @@ fn compile_word(start_index: *usize, line: []const u8) !void {
     start_index.* += 2;
 }
 
+fn handle_system_word(op: *const fn ([]const u8) anyerror!void) !void {
+    const op_struct = try gpa_alloc.create(instructions.Op);
+    op_struct.*.op = op;
+    const none_str = "";
+    op_struct.*.arg = try gpa_alloc.dupe(u8, none_str);
+    try op_stack.*.append(op_struct);
+}
+
+fn handle_stack_value(value: []const u8) !void {
+    const op_struct = try gpa_alloc.create(instructions.Op);
+    op_struct.*.op = instructions.push;
+    op_struct.*.arg = try gpa_alloc.dupe(u8, value);
+    try op_stack.*.append(op_struct);
+}
+
 fn parse(line: []const u8) !void {
     var start_index: usize = 0;
     //this allows us to skip forward to closing parens by altering the start_index
@@ -55,18 +70,11 @@ fn parse(line: []const u8) !void {
         }
 
         if (system_words.*.get(pruned_input)) |op| {
-            const op_struct = try gpa_alloc.create(instructions.Op);
-            op_struct.*.op = op;
-            const none_str = "";
-            op_struct.*.arg = try gpa_alloc.dupe(u8, none_str);
-            try op_stack.*.append(op_struct);
+            try handle_system_word(op);
         } else if (my_words.*.get(pruned_input)) |op| {
             try parse(op.*.words);
         } else {
-            const op_struct = try gpa_alloc.create(instructions.Op);
-            op_struct.*.op = instructions.push;
-            op_struct.*.arg = try gpa_alloc.dupe(u8, pruned_input);
-            try op_stack.*.append(op_struct);
+            try handle_stack_value(pruned_input);
         }
     }
 }
@@ -105,7 +113,7 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    parse(": two 2 ; two two * -2 + .") catch |err| {
+    parse(": two 2 ; two two * -2 .S + .") catch |err| {
         try outw.print("error: {}\n", .{err});
     };
 
