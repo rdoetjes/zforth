@@ -30,10 +30,13 @@ fn compile_word(start_index: *usize, line: []const u8) !void {
     while (start_index.* <= line.len - 1 and line[start_index.*] != ';') {
         const word_ops_result = try get_word(&start_index.*, line);
         start_index.* = word_ops_result[0].*;
+
         const my_word = try gpa_alloc.create(instructions.Op);
         my_word.*.arg = "";
+
         const t = line[old_index..start_index.*];
         my_word.*.words = try gpa_alloc.dupe(u8, t);
+
         const new_word_ptr = try gpa_alloc.dupe(u8, new_word);
         try my_words.*.put(new_word_ptr, my_word);
     }
