@@ -8,7 +8,7 @@ const inr = std.io.getStdIn().reader();
 var op_stack: *std.ArrayList(*interpreter.Op) = undefined;
 
 fn prompt() void {
-    outw.print("ok\n", .{}) catch {
+    outw.print("    ok\n", .{}) catch {
         std.debug.print("failed to print prompt", .{});
     };
 }
@@ -22,7 +22,6 @@ fn welcome() void {
 fn repl() void {
     welcome();
     while (true) {
-        prompt();
         const line = inr.readUntilDelimiterOrEofAlloc(gpa_alloc, '\n', 4096) catch |err| {
             outw.print("{}\n", .{err}) catch {};
             continue;
@@ -46,6 +45,7 @@ fn repl() void {
                 std.debug.panic("failed to print error message", .{});
             };
         };
+        prompt();
         gpa_alloc.free(line);
     }
 }

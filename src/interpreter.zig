@@ -135,6 +135,9 @@ pub fn parse(line: []const u8) !void {
         if (!std.mem.eql(u8, word, ".S")) _ = std.ascii.lowerString(pruned_input, word) else _ = std.mem.copyForwards(u8, pruned_input, word);
 
         if (word.len > 0 and word[0] == ':') {
+            if (line.len < 2) {
+                return error.Invalid_Word_Syntax;
+            }
             try compile_word(&start_index, line);
             continue;
         }
