@@ -134,7 +134,7 @@ fn repl() void {
                 std.debug.panic("failed to print error message", .{});
             };
         };
-        defer gpa_alloc.free(line);
+        gpa_alloc.free(line);
     }
 }
 pub fn main() !void {
