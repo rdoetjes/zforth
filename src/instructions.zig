@@ -62,6 +62,9 @@ pub fn div(_: []const u8) !void {
 }
 
 pub fn dot_s(_: []const u8) !void {
+    if (arg_stack.*.items.len == 0) {
+        return error.Stack_Underflow;
+    }
     try outw.print(".s <1> {d}\n", .{arg_stack.*.items[arg_stack.*.items.len - 1]});
 }
 
