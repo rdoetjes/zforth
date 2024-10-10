@@ -2,6 +2,7 @@ const std = @import("std");
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 const instructions = @import("instructions.zig");
+const outw = std.io.getStdOut().writer();
 
 var system_words: *std.StringHashMap(instructions.OpFunction) = undefined;
 var my_words: *std.StringHashMap(*instructions.Op) = undefined;
@@ -104,11 +105,11 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    parse("s") catch |err| {
-        std.debug.print("error: {}\n", .{err});
+    parse(": two 2 ; two two * -2 + .") catch |err| {
+        try outw.print("error: {}\n", .{err});
     };
 
     compile() catch |err| {
-        std.debug.print("error: {}\n", .{err});
+        try outw.print("error: {}\n", .{err});
     };
 }

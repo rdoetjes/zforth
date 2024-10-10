@@ -3,6 +3,7 @@ var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 var operations: *std.StringHashMap(OpFunction) = undefined;
 var arg_stack: *std.ArrayList(f32) = undefined;
+const outw = std.io.getStdOut().writer();
 
 pub const OpFunction = *const fn ([]const u8) anyerror!void;
 pub const Op = struct {
@@ -43,7 +44,6 @@ pub fn plus(_: []const u8) !void {
 pub fn mul(_: []const u8) !void {
     const a = arg_stack.*.pop();
     const b = arg_stack.*.pop();
-    std.debug.print("mul {d} {d}\n", .{ a, b });
     try arg_stack.*.append(a * b);
 }
 
@@ -54,20 +54,20 @@ pub fn div(_: []const u8) !void {
 }
 
 pub fn dot_s(_: []const u8) !void {
-    std.debug.print(".s <1> {d}\n", .{arg_stack.*.items[arg_stack.*.items.len - 1]});
+    try outw.print(".s <1> {d}\n", .{arg_stack.*.items[arg_stack.*.items.len - 1]});
 }
 
 pub fn dot_cap_s(_: []const u8) !void {
-    std.debug.print(".S <{d}> ", .{arg_stack.*.items.len});
+    try outw.print(".S <{d}> ", .{arg_stack.*.items.len});
     for (arg_stack.*.items) |item| {
-        std.debug.print("{d} ", .{item});
+        try outw.print("{d} ", .{item});
     }
-    std.debug.print("\n", .{});
+    try outw.print("\n", .{});
 }
 
 pub fn dot(_: []const u8) !void {
     const a = arg_stack.*.pop();
-    std.debug.print("{d}\n", .{a});
+    try outw.print("{d}\n", .{a});
 }
 
 pub fn dup(_: []const u8) !void {
@@ -93,7 +93,7 @@ pub fn sqrt(_: []const u8) !void {
 }
 
 pub fn print(a: []const u8) !void {
-    std.debug.print("{s}", .{a});
+    try outw.print("{s}", .{a});
 }
 
 pub fn push(a: []const u8) !void {
