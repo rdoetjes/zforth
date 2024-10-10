@@ -121,14 +121,12 @@ pub fn parse(line: []const u8) !void {
             try compile_word(&start_index, line);
             continue;
         }
-        std.debug.print("word: {s}\n", .{word});
+
         if (system_words.*.get(pruned_input)) |op| {
-            std.debug.print("word op: {s}\n", .{word});
             handle_system_word(op);
         } else if (my_words.*.get(pruned_input)) |op| {
             try parse(op.*.words);
         } else {
-            std.debug.print("word sta op: {s}\n", .{pruned_input});
             handle_stack_value(pruned_input);
         }
     }
