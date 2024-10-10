@@ -30,6 +30,7 @@ fn init_system_words() !void {
     try system_words.put("dup", instructions.dup);
     try system_words.put("drop", instructions.drop);
     try system_words.put("swap", instructions.swap);
+    try system_words.put("over", instructions.over);
     try system_words.put("sqr", instructions.sqrt);
 }
 

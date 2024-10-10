@@ -80,6 +80,14 @@ pub fn swap(_: []const u8) !void {
     try arg_stack.*.append(b);
 }
 
+pub fn over(_: []const u8) !void {
+    const a = try pop();
+    const b = try pop();
+    try arg_stack.*.append(b);
+    try arg_stack.*.append(a);
+    try arg_stack.*.append(b);
+}
+
 pub fn sqrt(_: []const u8) !void {
     const a = try pop();
     try arg_stack.*.append(std.math.sqrt(a));
