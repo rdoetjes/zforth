@@ -104,14 +104,11 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    try parse(": two 23 ;");
-    try parse(": three 3 ;");
-    try parse(": times * ;");
-    try parse(": six two three - ;");
-    try parse("six");
-    try parse("5 6 7 8");
-    try parse("9 10 11 12");
-    try parse("two .S");
+    parse("s") catch |err| {
+        std.debug.print("error: {}\n", .{err});
+    };
 
-    try compile();
+    compile() catch |err| {
+        std.debug.print("error: {}\n", .{err});
+    };
 }
