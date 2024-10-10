@@ -36,19 +36,35 @@ fn compile_word(start_index: *usize, line: []const u8) !void {
     start_index.* += 2;
 }
 
-fn handle_system_word(op: *const fn ([]const u8) anyerror!void) !void {
-    const op_struct = try gpa_alloc.create(instructions.Op);
+fn handle_system_word(op: *const fn ([]const u8) anyerror!void) void {
+    const op_struct = gpa_alloc.create(instructions.Op) catch |err| {
+        std.debug.panic("failed to allocate memory, when creating operation entry: {}\n", .{err});
+    };
+
     op_struct.*.op = op;
     const none_str = "";
-    op_struct.*.arg = try gpa_alloc.dupe(u8, none_str);
-    try op_stack.*.append(op_struct);
+    op_struct.*.arg = gpa_alloc.dupe(u8, none_str) catch |err| {
+        std.debug.panic("failed to allocate memory: {}\n", .{err});
+    };
+
+    op_stack.*.append(op_struct) catch |err| {
+        std.debug.panic("failed to allocate memory to push instruction onto op_stack: {}\n", .{err});
+    };
 }
 
-fn handle_stack_value(value: []const u8) !void {
-    const op_struct = try gpa_alloc.create(instructions.Op);
+fn handle_stack_value(value: []const u8) void {
+    const op_struct = gpa_alloc.create(instructions.Op) catch |err| {
+        std.debug.panic("failed to allocate memory, when creating stack entry: {}\n", .{err});
+    };
+
     op_struct.*.op = instructions.push;
-    op_struct.*.arg = try gpa_alloc.dupe(u8, value);
-    try op_stack.*.append(op_struct);
+    op_struct.*.arg = gpa_alloc.dupe(u8, value) catch |err| {
+        std.debug.panic("failed to allocate memory when copying value {s} : {}\n", .{ value, err });
+    };
+
+    op_stack.*.append(op_struct) catch |err| {
+        std.debug.panic("failed to allocate memory to push instruction onto stack: {}\n", .{err});
+    };
 }
 
 fn parse(line: []const u8) !void {
@@ -70,11 +86,11 @@ fn parse(line: []const u8) !void {
         }
 
         if (system_words.*.get(pruned_input)) |op| {
-            try handle_system_word(op);
+            handle_system_word(op);
         } else if (my_words.*.get(pruned_input)) |op| {
             try parse(op.*.words);
         } else {
-            try handle_stack_value(pruned_input);
+            handle_stack_value(pruned_input);
         }
     }
 }
