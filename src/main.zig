@@ -109,8 +109,22 @@ fn compile() !void {
     op_stack.*.clearRetainingCapacity();
 }
 
+fn prompt() void {
+    outw.print("ok\n", .{}) catch {
+        std.debug.print("failed to print prompt", .{});
+    };
+}
+
+fn welcome() void {
+    outw.print("small lean forth in zig\n", .{}) catch {
+        std.debug.print("failed to print welcome", .{});
+    };
+}
+
 fn repl() void {
+    welcome();
     while (true) {
+        prompt();
         const line = inr.readUntilDelimiterOrEofAlloc(gpa_alloc, '\n', 4096) catch |err| {
             outw.print("{}\n", .{err}) catch {};
             continue;
