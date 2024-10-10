@@ -3,6 +3,7 @@ var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 const instructions = @import("instructions.zig");
 const outw = std.io.getStdOut().writer();
+const inr = std.io.getStdIn().reader();
 
 var system_words: *std.StringHashMap(instructions.OpFunction) = undefined;
 var my_words: *std.StringHashMap(*instructions.Op) = undefined;
@@ -77,7 +78,6 @@ fn parse(line: []const u8) !void {
 
         const pruned_input = try gpa_alloc.alloc(u8, word.len);
         defer gpa_alloc.free(pruned_input);
-
         if (!std.mem.eql(u8, word, ".S")) _ = std.ascii.lowerString(pruned_input, word) else _ = std.mem.copyForwards(u8, pruned_input, word);
 
         if (word.len > 0 and word[0] == ':') {
@@ -104,10 +104,40 @@ fn compile() !void {
             try parse(op.*.words);
             try compile();
         }
+        std.debug.print("word:2 \n", .{});
         gpa_alloc.destroy(op);
     }
+    op_stack.*.clearRetainingCapacity();
 }
 
+fn repl() void {
+    while (true) {
+        const line = inr.readUntilDelimiterOrEofAlloc(gpa_alloc, '\n', 4096) catch |err| {
+            outw.print("{}\n", .{err}) catch {};
+            continue;
+        } orelse {
+            outw.print("End of input reached\n", .{}) catch {};
+            break;
+        };
+
+        const line_cleaned = std.mem.trim(u8, line, " \t\n");
+
+        parse(line_cleaned) catch |err| {
+            op_stack.*.clearRetainingCapacity();
+            outw.print("{}\n", .{err}) catch {
+                std.debug.panic("failed to print error message", .{});
+            };
+        };
+
+        compile() catch |err| {
+            op_stack.*.clearRetainingCapacity();
+            outw.print("{}\n", .{err}) catch {
+                std.debug.panic("failed to print error message", .{});
+            };
+        };
+        defer gpa_alloc.free(line);
+    }
+}
 pub fn main() !void {
     var l_arg_stack = std.ArrayList(f32).init(gpa_alloc);
     defer l_arg_stack.deinit();
@@ -129,11 +159,5 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    parse(": two 2 ; two two * -2 .S + . . .") catch |err| {
-        try outw.print("{}\n", .{err});
-    };
-
-    compile() catch |err| {
-        try outw.print("{}\n", .{err});
-    };
+    repl();
 }
