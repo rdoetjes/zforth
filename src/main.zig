@@ -129,11 +129,11 @@ pub fn main() !void {
 
     try instructions.init_operations(&l_system_words, &l_arg_stack);
 
-    parse(": two 2 ; two two * -2 .S + .") catch |err| {
-        try outw.print("error: {}\n", .{err});
+    parse(": two 2 ; two two * -2 .S + . . .") catch |err| {
+        try outw.print("{}\n", .{err});
     };
 
     compile() catch |err| {
-        try outw.print("error: {}\n", .{err});
+        try outw.print("{}\n", .{err});
     };
 }

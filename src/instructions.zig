@@ -29,27 +29,35 @@ pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_sta
     try operations.put("sqr", sqrt);
 }
 
+fn pop() !f32 {
+    if (arg_stack.*.items.len == 0) {
+        return error.Stack_Underflow;
+    }
+
+    return arg_stack.*.pop();
+}
+
 pub fn minus(_: []const u8) !void {
-    const a = arg_stack.*.pop();
-    const b = arg_stack.*.pop();
+    const a = try pop();
+    const b = try pop();
     try arg_stack.*.append(b - a);
 }
 
 pub fn plus(_: []const u8) !void {
-    const a = arg_stack.*.pop();
-    const b = arg_stack.*.pop();
+    const a = try pop();
+    const b = try pop();
     try arg_stack.*.append(a + b);
 }
 
 pub fn mul(_: []const u8) !void {
-    const a = arg_stack.*.pop();
-    const b = arg_stack.*.pop();
+    const a = try pop();
+    const b = try pop();
     try arg_stack.*.append(a * b);
 }
 
 pub fn div(_: []const u8) !void {
-    const a = arg_stack.*.pop();
-    const b = arg_stack.*.pop();
+    const a = try pop();
+    const b = try pop();
     try arg_stack.*.append(b / a);
 }
 
@@ -66,29 +74,29 @@ pub fn dot_cap_s(_: []const u8) !void {
 }
 
 pub fn dot(_: []const u8) !void {
-    const a = arg_stack.*.pop();
+    const a = try pop();
     try outw.print("{d}\n", .{a});
 }
 
 pub fn dup(_: []const u8) !void {
-    const a = arg_stack.*.pop();
+    const a = try pop();
     try arg_stack.*.append(a);
     try arg_stack.*.append(a);
 }
 
 pub fn drop(_: []const u8) !void {
-    _ = arg_stack.*.pop();
+    _ = try pop();
 }
 
 pub fn swap(_: []const u8) !void {
-    const a = arg_stack.*.pop();
-    const b = arg_stack.*.pop();
+    const a = try pop();
+    const b = try pop();
     try arg_stack.*.append(a);
     try arg_stack.*.append(b);
 }
 
 pub fn sqrt(_: []const u8) !void {
-    const a = arg_stack.*.pop();
+    const a = try pop();
     try arg_stack.*.append(std.math.sqrt(a));
 }
 
