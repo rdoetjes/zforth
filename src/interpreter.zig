@@ -26,6 +26,7 @@ fn init_system_words() !void {
     try system_words.put(".s", instructions.dot_s);
     try system_words.put(".S", instructions.dot_cap_s);
     try system_words.put("*", instructions.mul);
+    try system_words.put(".\"", instructions.print);
     try system_words.put("/", instructions.div);
     try system_words.put("dup", instructions.dup);
     try system_words.put("drop", instructions.drop);
@@ -81,14 +82,13 @@ fn compile_word(start_index: *usize, line: []const u8) !void {
     start_index.* += 2;
 }
 
-fn handle_system_word(op: *const fn ([]const u8) anyerror!void) void {
+fn handle_system_word(op: *const fn ([]const u8) anyerror!void, op_arg: []const u8) void {
     const op_struct = gpa_alloc.create(Op) catch |err| {
         std.debug.panic("failed to allocate memory, when creating operation entry: {}\n", .{err});
     };
 
     op_struct.*.op = op;
-    const none_str = "";
-    op_struct.*.arg = gpa_alloc.dupe(u8, none_str) catch |err| {
+    op_struct.*.arg = gpa_alloc.dupe(u8, op_arg) catch |err| {
         std.debug.panic("failed to allocate memory: {}\n", .{err});
     };
 
@@ -112,6 +112,15 @@ fn handle_stack_value(value: []const u8) void {
     };
 }
 
+fn handle_print_word(line: []const u8, start_index: *usize) void {
+    const b_start_index = start_index.*;
+    for (line[start_index.*..]) |c| {
+        if (c != '"') start_index.* += 1 else break;
+    }
+    handle_system_word(instructions.print, line[b_start_index..start_index.*]);
+    start_index.* += 2;
+}
+
 pub fn parse(line: []const u8) !void {
     var start_index: usize = 0;
     //this allows us to skip forward to closing parens by altering the start_index
@@ -129,8 +138,10 @@ pub fn parse(line: []const u8) !void {
             continue;
         }
 
-        if (system_words.*.get(pruned_input)) |op| {
-            handle_system_word(op);
+        if (std.mem.eql(u8, word, ".\"")) {
+            handle_print_word(line, &start_index);
+        } else if (system_words.*.get(pruned_input)) |op| {
+            handle_system_word(op, "");
         } else if (my_words.*.get(pruned_input)) |op| {
             try parse(op.*.words);
         } else {
