@@ -97,6 +97,10 @@ pub fn print(a: []const u8) !void {
     try outw.print("{s}", .{a});
 }
 
+pub fn cr(_: []const u8) !void {
+    try outw.print("\n", .{});
+}
+
 pub fn push(a: []const u8) !void {
     const value = std.fmt.parseFloat(f32, a) catch {
         return error.Invalid_Number;

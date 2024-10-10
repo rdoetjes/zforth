@@ -27,6 +27,7 @@ fn init_system_words() !void {
     try system_words.put(".S", instructions.dot_cap_s);
     try system_words.put("*", instructions.mul);
     try system_words.put(".\"", instructions.print);
+    try system_words.put("cr", instructions.cr);
     try system_words.put("/", instructions.div);
     try system_words.put("dup", instructions.dup);
     try system_words.put("drop", instructions.drop);
