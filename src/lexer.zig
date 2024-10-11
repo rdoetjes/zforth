@@ -31,7 +31,7 @@ const Token = struct {
 
 pub fn print_tokens(tokens: *std.ArrayList(Token)) void {
     for (tokens.*.items) |token| {
-        std.debug.print("{any} {s} {d}", .{ token.type, token.text, token.start_pos });
+        std.debug.print("{any} {s} {d}\n", .{ token.type, token.text, token.start_pos });
     }
 }
 
