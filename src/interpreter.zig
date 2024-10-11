@@ -15,10 +15,10 @@ var op_stack: *std.ArrayList(*Op) = undefined;
 const instructions = @import("instructions.zig");
 
 pub const Op = struct {
-    words: []const u8,
-    op: OpFunction,
-    op_compile: OpCompileFunction,
-    arg: []const u8,
+    words: []const u8, //contains the words of a user defined word (that will be parsed and run)
+    op: OpFunction, //the function pointer of a system_word
+    op_compile: OpCompileFunction, // the function pointer of a compile_word
+    arg: []const u8, // the optional argumen for op function
 };
 
 fn init_system_words() !void {
