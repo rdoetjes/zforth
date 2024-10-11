@@ -55,6 +55,15 @@ fn find_end_current_token(line: *const []const u8, pos: usize) usize {
     return end_pos;
 }
 
+fn check_if_number(line: *const []const u8) !bool {
+    var t_pos: usize = 0;
+    while (t_pos < line.*.len and line.*[t_pos] != ' ' and line.*[t_pos] != '\n') {
+        if (line.*[t_pos] < '0' or line.*[t_pos] > '9') return error.Not_A_Number;
+        t_pos += 1;
+    }
+    return true;
+}
+
 pub fn lex(allocator: std.mem.Allocator, line: []const u8) !*std.ArrayList(Token) {
     var tokens = try std.ArrayList(Token).initCapacity(allocator, 10);
 
@@ -66,12 +75,15 @@ pub fn lex(allocator: std.mem.Allocator, line: []const u8) !*std.ArrayList(Token
 
         // Match token
         const token_text = line[pos..end_pos];
-        if (std.mem.eql(u8, token_text, "PUSH")) {
-            try tokens.append(Token.init(TokenType.PUSH, pos, token_text));
+        if (std.mem.eql(u8, token_text, "+")) {
+            try tokens.append(Token.init(TokenType.ADD, pos, token_text));
         } else if (std.mem.eql(u8, token_text, ".\"")) {
             try tokens.append(Token.init(TokenType.DOT_DOUBLE_QUOTE, pos, token_text));
+        } else if (std.mem.eql(u8, token_text, ".")) {
+            try tokens.append(Token.init(TokenType.DOT, pos, token_text));
         } else {
             // Handle other token types or unknown tokens here
+            if (try check_if_number(&line[pos..end_pos])) try tokens.append(Token.init(TokenType.NUMBER, pos, token_text));
         }
 
         pos = end_pos;
