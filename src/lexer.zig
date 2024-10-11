@@ -69,7 +69,7 @@ pub fn lex(allocator: std.mem.Allocator, line: []const u8) !*std.ArrayList(Token
         if (std.mem.eql(u8, token_text, "PUSH")) {
             try tokens.append(Token.init(TokenType.PUSH, pos, token_text));
         } else if (std.mem.eql(u8, token_text, ".\"")) {
-            try tokens.append(Token.init(TokenType.DOP_DOUBLE_QUOTE, pos, token_text));
+            try tokens.append(Token.init(TokenType.DOT_DOUBLE_QUOTE, pos, token_text));
         } else {
             // Handle other token types or unknown tokens here
         }
