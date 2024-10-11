@@ -12,10 +12,12 @@ var op_stack: *std.ArrayList(*Op) = undefined;
 const instructions = @import("instructions.zig");
 
 pub const OpFunction = *const fn ([]const u8) anyerror!void;
+pub const OpCompileFunction = *const fn ([]const u8, *usize) anyerror!void;
 
 pub const Op = struct {
     words: []const u8,
     op: OpFunction,
+    op_compile: OpCompileFunction,
     arg: []const u8,
 };
 
@@ -37,7 +39,7 @@ fn init_system_words() !void {
 
 fn init_compile_words() !void {
     try compile_words.put("do", instructions.do);
-    try compile_words.put(".\"", instructions.print);
+    try compile_words.put(".\"", instructions.dot_dquote);
 }
 
 pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32), l_op_stack: *std.ArrayList(*Op), l_my_words: *std.StringHashMap(*Op), l_compile_words: *std.StringHashMap(OpFunction)) !void {
@@ -83,7 +85,7 @@ fn compile_word(start_index: *usize, line: []const u8) !void {
     start_index.* += 2;
 }
 
-fn handle_system_word(op: *const fn ([]const u8) anyerror!void, op_arg: []const u8) void {
+pub fn handle_system_word(op: *const fn ([]const u8) anyerror!void, op_arg: []const u8) void {
     const op_struct = gpa_alloc.create(Op) catch |err| {
         std.debug.panic("failed to allocate memory, when creating operation entry: {}\n", .{err});
     };
@@ -113,15 +115,6 @@ fn handle_stack_value(value: []const u8) void {
     };
 }
 
-fn handle_print_word(line: []const u8, start_index: *usize) void {
-    const b_start_index = start_index.*;
-    for (line[start_index.*..]) |c| {
-        if (c != '"') start_index.* += 1 else break;
-    }
-    handle_system_word(instructions.print, line[b_start_index..start_index.*]);
-    start_index.* += 2;
-}
-
 pub fn parse(line: []const u8) !void {
     var start_index: usize = 0;
     //this allows us to skip forward to closing parens by altering the start_index
@@ -143,7 +136,7 @@ pub fn parse(line: []const u8) !void {
         }
 
         if (std.mem.eql(u8, word, ".\"")) {
-            handle_print_word(line, &start_index);
+            instructions.handle_print_word(line, &start_index);
             if (start_index < line.len) {
                 try parse(line[start_index..]);
                 break;

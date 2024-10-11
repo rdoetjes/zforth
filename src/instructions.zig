@@ -108,3 +108,12 @@ pub fn push(a: []const u8) !void {
 
     try arg_stack.*.append(value);
 }
+
+pub fn dot_dquote(line: []const u8, start_index: *usize) void {
+    const b_start_index = start_index.*;
+    for (line[start_index.*..]) |c| {
+        if (c != '"') start_index.* += 1 else break;
+    }
+    interpreter.handle_system_word(print, line[b_start_index..start_index.*]);
+    start_index.* += 2;
+}
