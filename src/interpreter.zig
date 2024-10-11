@@ -2,24 +2,14 @@ const std = @import("std");
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 
-pub const OpFunction = *const fn ([]const u8) anyerror!void;
-pub const OpCompileFunction = *const fn ([]const u8, *usize) anyerror!void;
-
-var system_words: *std.StringHashMap(OpFunction) = undefined;
-var compile_words: *std.StringHashMap(OpCompileFunction) = undefined;
-var my_words: *std.StringHashMap(*Op) = undefined;
+var system_words: *std.StringHashMap(instructions.OpFunction) = undefined;
+var compile_words: *std.StringHashMap(instructions.OpCompileFunction) = undefined;
+var my_words: *std.StringHashMap(*instructions.Op) = undefined;
 
 var arg_stack: *std.ArrayList(f32) = undefined;
-var op_stack: *std.ArrayList(*Op) = undefined;
+var op_stack: *std.ArrayList(*instructions.Op) = undefined;
 
 const instructions = @import("instructions.zig");
-
-pub const Op = struct {
-    words: []const u8, //contains the words of a user defined word (that will be parsed and run)
-    op: OpFunction, //the function pointer of a system_word
-    op_compile: OpCompileFunction, // the function pointer of a compile_word
-    arg: []const u8, // the optional argumen for op function
-};
 
 fn init_system_words() !void {
     try system_words.put("push", instructions.push);
@@ -41,7 +31,7 @@ fn init_compile_words() !void {
     try compile_words.put(".\"", instructions.dot_dquote);
 }
 
-pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32), l_op_stack: *std.ArrayList(*Op), l_my_words: *std.StringHashMap(*Op), l_compile_words: *std.StringHashMap(OpCompileFunction)) !void {
+pub fn init_operations(l_system_words: *std.StringHashMap(instructions.OpFunction), l_arg_stack: *std.ArrayList(f32), l_op_stack: *std.ArrayList(*instructions.Op), l_my_words: *std.StringHashMap(*instructions.Op), l_compile_words: *std.StringHashMap(instructions.OpCompileFunction)) !void {
     arg_stack = l_arg_stack;
     system_words = l_system_words;
     op_stack = l_op_stack;
@@ -73,7 +63,7 @@ fn compile_user_word(start_index: *usize, line: []const u8) !void {
         const word_ops_result = try get_word(&start_index.*, line);
         start_index.* = word_ops_result[0].*;
 
-        const my_word = try gpa_alloc.create(Op);
+        const my_word = try gpa_alloc.create(instructions.Op);
         my_word.*.arg = "";
 
         const t = line[old_index..start_index.*];
@@ -86,7 +76,7 @@ fn compile_user_word(start_index: *usize, line: []const u8) !void {
 }
 
 pub fn handle_system_word(op: *const fn ([]const u8) anyerror!void, op_arg: []const u8) void {
-    const op_struct = gpa_alloc.create(Op) catch |err| {
+    const op_struct = gpa_alloc.create(instructions.Op) catch |err| {
         std.debug.panic("failed to allocate memory, when creating operation entry: {}\n", .{err});
     };
 
@@ -101,7 +91,7 @@ pub fn handle_system_word(op: *const fn ([]const u8) anyerror!void, op_arg: []co
 }
 
 fn handle_stack_value(value: []const u8) void {
-    const op_struct = gpa_alloc.create(Op) catch |err| {
+    const op_struct = gpa_alloc.create(instructions.Op) catch |err| {
         std.debug.panic("failed to allocate memory, when creating stack entry: {}\n", .{err});
     };
 

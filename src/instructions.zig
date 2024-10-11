@@ -3,6 +3,16 @@ pub var arg_stack: *std.ArrayList(f32) = undefined;
 const outw = std.io.getStdOut().writer();
 const interpreter = @import("interpreter.zig");
 
+pub const OpFunction = *const fn ([]const u8) anyerror!void;
+pub const OpCompileFunction = *const fn ([]const u8, *usize) anyerror!void;
+
+pub const Op = struct {
+    words: []const u8, //contains the words of a user defined word (that will be parsed and run)
+    op: OpFunction, //the function pointer of a system_word
+    op_compile: OpCompileFunction, // the function pointer of a compile_word
+    arg: []const u8, // the optional argumen for op function
+};
+
 fn pop() !f32 {
     if (arg_stack.*.items.len == 0) {
         return error.Stack_Underflow;
