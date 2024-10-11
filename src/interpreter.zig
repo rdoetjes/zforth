@@ -2,17 +2,17 @@ const std = @import("std");
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
 
+pub const OpFunction = *const fn ([]const u8) anyerror!void;
+pub const OpCompileFunction = *const fn ([]const u8, *usize) anyerror!void;
+
 var system_words: *std.StringHashMap(OpFunction) = undefined;
-var compile_words: *std.StringHashMap(OpFunction) = undefined;
+var compile_words: *std.StringHashMap(OpCompileFunction) = undefined;
 var my_words: *std.StringHashMap(*Op) = undefined;
 
 var arg_stack: *std.ArrayList(f32) = undefined;
 var op_stack: *std.ArrayList(*Op) = undefined;
 
 const instructions = @import("instructions.zig");
-
-pub const OpFunction = *const fn ([]const u8) anyerror!void;
-pub const OpCompileFunction = *const fn ([]const u8, *usize) anyerror!void;
 
 pub const Op = struct {
     words: []const u8,
@@ -38,11 +38,10 @@ fn init_system_words() !void {
 }
 
 fn init_compile_words() !void {
-    try compile_words.put("do", instructions.do);
     try compile_words.put(".\"", instructions.dot_dquote);
 }
 
-pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32), l_op_stack: *std.ArrayList(*Op), l_my_words: *std.StringHashMap(*Op), l_compile_words: *std.StringHashMap(OpFunction)) !void {
+pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_stack: *std.ArrayList(f32), l_op_stack: *std.ArrayList(*Op), l_my_words: *std.StringHashMap(*Op), l_compile_words: *std.StringHashMap(OpCompileFunction)) !void {
     arg_stack = l_arg_stack;
     system_words = l_system_words;
     op_stack = l_op_stack;
@@ -51,6 +50,7 @@ pub fn init_operations(l_system_words: *std.StringHashMap(OpFunction), l_arg_sta
     instructions.arg_stack = l_arg_stack;
 
     try init_system_words();
+    try init_compile_words();
 }
 
 fn get_word(start_index: *usize, line: []const u8) !struct { *usize, []const u8 } {
@@ -135,19 +135,19 @@ pub fn parse(line: []const u8) !void {
             continue;
         }
 
-        if (std.mem.eql(u8, word, ".\"")) {
-            instructions.handle_print_word(line, &start_index);
+        if (compile_words.*.get(pruned_input)) |op| { //compile words will cause extra parse recursion unlike system_words
+            try op(line, &start_index);
             if (start_index < line.len) {
                 try parse(line[start_index..]);
                 break;
             }
-        } else if (system_words.*.get(pruned_input)) |op| {
+        } else if (system_words.*.get(pruned_input)) |op| { //system words are a single expression, that don't need recursion
             handle_system_word(op, "");
         } else if (my_words.*.get(pruned_input)) |op| {
             try parse(op.*.words);
             break;
         } else {
-            handle_stack_value(pruned_input);
+            handle_stack_value(pruned_input); // anything else is a value that is handled as an f32
         }
     }
 }

@@ -65,7 +65,7 @@ pub fn main() !void {
     var l_system_words = std.StringHashMap(interpreter.OpFunction).init(gpa_alloc);
     defer l_system_words.deinit();
 
-    var l_compile_words = std.StringHashMap(interpreter.OpFunction).init(gpa_alloc);
+    var l_compile_words = std.StringHashMap(interpreter.OpCompileFunction).init(gpa_alloc);
     defer l_compile_words.deinit();
 
     try interpreter.init_operations(&l_system_words, &l_arg_stack, &l_op_stack, &l_my_words, &l_compile_words);
