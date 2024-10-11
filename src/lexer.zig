@@ -11,7 +11,7 @@ const TokenType = enum {
     DOT,
     DOT_S,
     DOT_CAP_S,
-    DOP_DOUBLE_QUOTE,
+    DOT_DOUBLE_QUOTE,
     EOF,
 };
 
