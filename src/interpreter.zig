@@ -139,13 +139,12 @@ pub fn parse(line: []const u8) !void {
             try op(line, &start_index);
             if (start_index < line.len) {
                 try parse(line[start_index..]);
-                break;
+                break; //read the next word, that is no longer part of the current compile words
             }
         } else if (system_words.*.get(pruned_input)) |op| { //system words are a single expression, that don't need recursion
             handle_system_word(op, "");
         } else if (my_words.*.get(pruned_input)) |op| {
             try parse(op.*.words);
-            break;
         } else {
             handle_stack_value(pruned_input); // anything else is a value that is handled as an f32
         }
