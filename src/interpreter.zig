@@ -63,7 +63,7 @@ fn get_word(start_index: *usize, line: []const u8) !struct { *usize, []const u8 
     return .{ start_index, line[start_pos .. start_index.* - 1] };
 }
 
-fn compile_word(start_index: *usize, line: []const u8) !void {
+fn compile_user_word(start_index: *usize, line: []const u8) !void {
     const dictionary_result = try get_word(start_index, line);
     start_index.* = dictionary_result[0].*;
     const old_index = start_index.*;
@@ -131,7 +131,7 @@ pub fn parse(line: []const u8) !void {
             if (line.len < 2) {
                 return error.Invalid_Word_Syntax;
             }
-            try compile_word(&start_index, line);
+            try compile_user_word(&start_index, line);
             continue;
         }
 
