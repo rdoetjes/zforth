@@ -4,12 +4,14 @@ const outw = std.io.getStdOut().writer();
 pub const lexer = struct {
     stack: std.ArrayList(f32),
     allocator: std.mem.Allocator,
+    user_words: std.StringHashMap([]const u8),
 
     pub fn init(allocator: std.mem.Allocator) !*lexer {
         const self = try allocator.create(lexer);
         self.* = .{
             .stack = std.ArrayList(f32).init(allocator),
             .allocator = allocator,
+            .user_words = std.StringHashMap([]const u8).init(allocator),
         };
         return self;
     }
@@ -122,11 +124,27 @@ pub const lexer = struct {
 
         const b: usize = @intFromFloat(try self.pop());
         const a: usize = @intFromFloat(try self.pop());
-        std.debug.print("a: {d} b: {d} arg: {s} \n", .{ a, b, arg });
         for (a..b) |_| {
             try self.lex(arg);
         }
         end_pos.* = new_end_pos + 5;
+    }
+
+    fn compile_word(self: *lexer, line: []const u8, end_pos: *usize) !void {
+        end_pos.* += 1;
+        const word_end = find_end_current_token(&line, end_pos.*);
+
+        std.debug.print("{d} {d}\n", .{ end_pos.*, word_end });
+        const word = line[end_pos.*..word_end];
+        const owned_key = try self.allocator.dupe(u8, word);
+        end_pos.* = word_end + 1;
+
+        const definition_end = try find_end_marker(&line, end_pos.*, " ;");
+        const owned_stmnt = try self.allocator.dupe(u8, line[end_pos.* .. definition_end + 1]);
+
+        try self.user_words.put(owned_key, owned_stmnt);
+
+        end_pos.* = definition_end + 2;
     }
 
     pub fn lex(self: *lexer, line: []const u8) anyerror!void {
@@ -139,9 +157,13 @@ pub const lexer = struct {
 
             // Match token
             const token_text = line[pos..end_pos];
-
-            if (std.mem.eql(u8, token_text, ".\"")) {
+            if (self.user_words.get(token_text)) |stmnt| {
+                std.debug.print("user_word: {s} >{s}<\n", .{ token_text, stmnt });
+                try self.lex(stmnt);
+            } else if (std.mem.eql(u8, token_text, ".\"")) {
                 try print_string(self, line, &end_pos);
+            } else if (std.mem.eql(u8, token_text, ":")) {
+                try compile_word(self, line, &end_pos);
             } else if (std.mem.eql(u8, token_text, "do")) {
                 try do_number(self, line, &end_pos);
             } else if (std.mem.eql(u8, token_text, ".")) {
