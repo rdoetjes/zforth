@@ -56,7 +56,6 @@ pub const lexer = struct {
                 in_quotes = !in_quotes;
             } else if (!in_quotes) {
                 if (std.mem.startsWith(u8, line.*[current_pos..], marker)) {
-                    std.debug.print("found marker {s}\n", .{marker});
                     return current_pos;
                 }
             }
