@@ -47,13 +47,13 @@ pub const lexer = struct {
         return error.Marker_Not_Found;
     }
 
-    fn check_if_number(line: *const []const u8) bool {
+    fn check_if_number(line: *const []const u8) !bool {
         var t_pos: usize = 0;
         while (t_pos < line.*.len and line.*[t_pos] != ' ' and line.*[t_pos] != '\n') {
             if (line.*[t_pos] == '.') {
                 t_pos += 1;
             } else if (line.*[t_pos] < '0' or line.*[t_pos] > '9') {
-                outw.print("Invalid number\n", .{}) catch {};
+                return error.Not_A_Number;
             } else {
                 t_pos += 1;
             }
@@ -61,72 +61,75 @@ pub const lexer = struct {
         return true;
     }
 
-    fn pop(self: *lexer) f32 {
+    fn pop(self: *lexer) !f32 {
         if (self.stack.items.len == 0) {
-            outw.print("Stack underflow\n", .{}) catch {};
-            return 0;
+            return error.Stack_Underflow;
         }
-        const a = self.pop();
+        const a = self.stack.pop();
         return a;
     }
 
-    fn add(self: *lexer) void {
-        const b = self.pop();
-        const a = self.pop();
-        self.stack.append(a + b) catch {
-            std.debug.panic("out of memory", .{});
-        };
+    fn add(self: *lexer) !void {
+        const b = try self.pop();
+        const a = try self.pop();
+        try self.stack.append(a + b);
     }
 
-    fn mul(self: *lexer) void {
-        const a = self.pop();
-        const b = self.pop();
-        self.stack.append(a * b) catch {
-            std.debug.panic("out of memory", .{});
-        };
+    fn mul(self: *lexer) !void {
+        const a = try self.pop();
+        const b = try self.pop();
+        try self.stack.append(a * b);
     }
 
-    fn div(self: *lexer) void {
-        const b = self.pop();
-        const a = self.pop();
-        if (b == 0) {
-            outw.print("Division by zero\n", .{}) catch {};
-            return;
+    fn div(self: *lexer) !void {
+        const b = try self.pop();
+        const a = try self.pop();
+        try self.stack.append(a / b);
+    }
+
+    fn dot_cap_s(self: *lexer) !void {
+        try outw.print("S <{d}> ", .{self.stack.items.len});
+        for (self.stack.items) |item| {
+            try outw.print("{d} ", .{item});
         }
-        self.stack.append(a / b) catch {
-            std.debug.panic("out of memory", .{});
-        };
+        try outw.print("\n", .{});
     }
 
-    fn print_string(_: *lexer, line: []const u8, end_pos: *usize) void {
-        const new_end_pos = find_end_marker(&line, end_pos.*, "\"") catch {
-            outw.print("String without end \" marker\n", .{}) catch {};
-            return;
-        };
+    fn dot_s(self: *lexer) !void {
+        try outw.print("s {d} ", .{self.stack.items[self.stack.items.len - 1]});
+    }
+
+    fn dot(self: *lexer) !void {
+        try outw.print("{d}\n", .{try self.pop()});
+    }
+
+    fn cr(_: *lexer) !void {
+        try outw.print("\n", .{});
+    }
+
+    fn print_string(_: *lexer, line: []const u8, end_pos: *usize) !void {
+        const new_end_pos = try find_end_marker(&line, end_pos.*, "\"");
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
-        outw.print("{s}", .{arg}) catch {};
+        try outw.print("{s}", .{arg});
         end_pos.* = new_end_pos + 1;
     }
 
-    fn do_number(self: *lexer, line: []const u8, end_pos: *usize) void {
-        const new_end_pos = find_end_marker(&line, end_pos.*, "loop") catch {
-            outw.print("do without loop\n", .{}) catch {};
-            return;
-        };
+    fn do_number(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+        const new_end_pos = try find_end_marker(&line, end_pos.*, "loop");
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
 
-        const b: usize = @intFromFloat(self.stack.pop());
-        const a: usize = @intFromFloat(self.stack.pop());
+        const b: usize = @intFromFloat(try self.pop());
+        const a: usize = @intFromFloat(try self.pop());
         std.debug.print("a: {d} b: {d} arg: {s} \n", .{ a, b, arg });
         for (a..b) |_| {
-            self.lex(arg);
+            try self.lex(arg);
         }
         end_pos.* = new_end_pos + 5;
     }
 
-    pub fn lex(self: *lexer, line: []const u8) void {
+    pub fn lex(self: *lexer, line: []const u8) anyerror!void {
         var pos: usize = 0;
 
         while (pos < line.len) {
@@ -138,30 +141,28 @@ pub const lexer = struct {
             const token_text = line[pos..end_pos];
 
             if (std.mem.eql(u8, token_text, ".\"")) {
-                print_string(self, line, &end_pos);
+                try print_string(self, line, &end_pos);
             } else if (std.mem.eql(u8, token_text, "do")) {
-                do_number(self, line, &end_pos);
+                try do_number(self, line, &end_pos);
             } else if (std.mem.eql(u8, token_text, ".")) {
-                outw.print("{d}", .{self.stack.pop()}) catch {};
+                try dot(self);
+            } else if (std.mem.eql(u8, token_text, ".s")) {
+                try dot_s(self);
+            } else if (std.mem.eql(u8, token_text, ".S")) {
+                try dot_cap_s(self);
             } else if (std.mem.eql(u8, token_text, "cr")) {
-                outw.print("\n", .{}) catch {};
+                try cr(self);
             } else if (std.mem.eql(u8, token_text, "+")) {
-                self.add();
+                try self.add();
             } else if (std.mem.eql(u8, token_text, "*")) {
-                self.mul();
+                try self.mul();
             } else if (std.mem.eql(u8, token_text, "/")) {
-                self.div();
+                try self.div();
             } else {
                 // Handle other token types or unknown tokens here
-                std.debug.print("Unknown token: {s}\n", .{token_text});
-                if (check_if_number(&line[pos..end_pos])) {
-                    const number = std.fmt.parseFloat(f32, token_text) catch {
-                        std.debug.print("Invalid number\n", .{});
-                        continue;
-                    };
-                    self.stack.append(number) catch {
-                        std.debug.panic("out of memory", .{});
-                    };
+                if (try check_if_number(&line[pos..end_pos])) {
+                    const number = try std.fmt.parseFloat(f32, token_text);
+                    try self.stack.append(number);
                 }
             }
 
