@@ -42,8 +42,25 @@ pub const lexer = struct {
     }
 
     fn find_end_marker(line: *const []const u8, pos: usize, marker: []const u8) !usize {
-        if (std.mem.indexOf(u8, line.*[pos + 1 ..], marker)) |t_pos| {
-            return pos + t_pos + 1;
+        var current_pos = pos + 1;
+        var in_quotes = false;
+
+        if (std.mem.eql(u8, marker, "\"")) {
+            if (std.mem.indexOf(u8, line.*[pos + 1 ..], marker)) |t_pos| {
+                return pos + t_pos + 1;
+            }
+        }
+
+        while (current_pos < line.len) {
+            if (line.*[current_pos] == '"') {
+                in_quotes = !in_quotes;
+            } else if (!in_quotes) {
+                if (std.mem.startsWith(u8, line.*[current_pos..], marker)) {
+                    std.debug.print("found marker {s}\n", .{marker});
+                    return current_pos;
+                }
+            }
+            current_pos += 1;
         }
 
         return error.Marker_Not_Found;
@@ -134,7 +151,6 @@ pub const lexer = struct {
         end_pos.* += 1;
         const word_end = find_end_current_token(&line, end_pos.*);
 
-        std.debug.print("{d} {d}\n", .{ end_pos.*, word_end });
         const word = line[end_pos.*..word_end];
         const owned_key = try self.allocator.dupe(u8, word);
         end_pos.* = word_end + 1;
