@@ -10,11 +10,9 @@ pub fn main() !void {
 
     while (true) {
         //const line = try std.io.getStdIn().reader().readUntilDelimiterAlloc(gpa_alloc, '\n', 1024);
-        const line = "100.3 20.3 .\" the answer is: \" / . .\"  metric\" cr";
+        const line = " 1 0 20 do 1  + . cr loop";
 
-        forth.lex(line) catch |err| {
-            std.debug.print("Error: {any}\n", .{err});
-        };
+        forth.lex(line);
         break;
     }
 }
