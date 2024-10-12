@@ -50,8 +50,12 @@ pub const lexer = struct {
     fn check_if_number(line: *const []const u8) !bool {
         var t_pos: usize = 0;
         while (t_pos < line.*.len and line.*[t_pos] != ' ' and line.*[t_pos] != '\n') {
-            if (line.*[t_pos] < '0' or line.*[t_pos] > '9') return error.Not_A_Number;
-            t_pos += 1;
+            if (line.*[t_pos] == '.') {
+                t_pos += 1;
+            } else if (line.*[t_pos] < '0' or line.*[t_pos] > '9') return error.Not_A_Number;
+            {
+                t_pos += 1;
+            }
         }
         return true;
     }
