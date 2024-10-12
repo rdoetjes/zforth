@@ -86,6 +86,14 @@ pub const lexer = struct {
         try self.stack.append(a / b);
     }
 
+    fn print_string(_: *lexer, line: []const u8, end_pos: *usize) !void {
+        const new_end_pos = try find_end_marker(&line, end_pos.*, "\" ");
+        const start_pos = end_pos.*;
+        const arg = line[start_pos + 1 .. new_end_pos];
+        try outw.print("{s}", .{arg});
+        end_pos.* = new_end_pos + 1;
+    }
+
     pub fn lex(self: *lexer, line: []const u8) !void {
         var pos: usize = 0;
 
@@ -98,10 +106,7 @@ pub const lexer = struct {
             const token_text = line[pos..end_pos];
 
             if (std.mem.eql(u8, token_text, ".\"")) {
-                const new_end_pos = try find_end_marker(&line, end_pos, "\" ");
-                const arg = line[end_pos + 1 .. new_end_pos];
-                try outw.print("{s}", .{arg});
-                end_pos = new_end_pos + 1;
+                try print_string(self, line, &end_pos);
             } else if (std.mem.eql(u8, token_text, ".")) {
                 try outw.print("{d}", .{self.stack.pop()});
             } else if (std.mem.eql(u8, token_text, "cr")) {
