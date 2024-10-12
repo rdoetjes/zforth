@@ -1,4 +1,5 @@
 const std = @import("std");
+const outw = std.io.getStdOut().writer();
 
 pub const lexer = struct {
     stack: std.ArrayList(f32),
@@ -75,6 +76,12 @@ pub const lexer = struct {
         try self.stack.append(a * b);
     }
 
+    fn div(self: *lexer) !void {
+        const b = self.stack.pop();
+        const a = self.stack.pop();
+        try self.stack.append(a / b);
+    }
+
     pub fn lex(self: *lexer, line: []const u8) !void {
         var pos: usize = 0;
 
@@ -86,19 +93,21 @@ pub const lexer = struct {
             // Match token
             const token_text = line[pos..end_pos];
 
-            if (std.mem.eql(u8, token_text, "+")) {
-                try self.add();
-            } else if (std.mem.eql(u8, token_text, ".\"")) {
+            if (std.mem.eql(u8, token_text, ".\"")) {
                 const new_end_pos = try find_end_marker(&line, end_pos, "\" ");
                 const arg = line[end_pos + 1 .. new_end_pos];
-                std.debug.print("{s}", .{arg});
+                try outw.print("{s}", .{arg});
                 end_pos = new_end_pos + 1;
             } else if (std.mem.eql(u8, token_text, ".")) {
-                std.debug.print("{d}", .{self.stack.pop()});
+                try outw.print("{d}", .{self.stack.pop()});
             } else if (std.mem.eql(u8, token_text, "cr")) {
-                std.debug.print("\n", .{});
+                try outw.print("\n", .{});
+            } else if (std.mem.eql(u8, token_text, "+")) {
+                try self.add();
             } else if (std.mem.eql(u8, token_text, "*")) {
                 try self.mul();
+            } else if (std.mem.eql(u8, token_text, "/")) {
+                try self.div();
             } else {
                 // Handle other token types or unknown tokens here
                 if (try check_if_number(&line[pos..end_pos])) {

@@ -10,7 +10,7 @@ pub fn main() !void {
 
     while (true) {
         //const line = try std.io.getStdIn().reader().readUntilDelimiterAlloc(gpa_alloc, '\n', 1024);
-        const line = "10 20 .\" the answer is: \" * . cr";
+        const line = "100 20 .\" the answer is: \" / . .\"  metric\" cr";
 
         forth.lex(line) catch |err| {
             std.debug.print("Error: {any}\n", .{err});
