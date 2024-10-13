@@ -232,6 +232,8 @@ pub const lexer = struct {
     }
 
     fn if_then(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+        // todo : handle else (check whether else or then comes first)
+        // if else comes first then we need to handle it as well.
         const new_end_pos = try find_end_marker(&line, end_pos.*, "then");
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
@@ -260,7 +262,7 @@ pub const lexer = struct {
 
     pub fn lex(self: *lexer, line: []const u8) anyerror!void {
         var pos: usize = 0;
-        
+
         while (pos < line.len) {
             pos = skip_white_spaces(&line, pos);
             if (pos >= line.len) break;
