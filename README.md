@@ -11,3 +11,6 @@ When you ever need a nice partial interpreter, you can always use this one and m
 ## No classic Lexer, Parser, AST, Interpreter
 I initially started with a lexer, parser and AST, but it turned out to be a lot of work and defeating the whole purpose of Forth which was meant to be simple to be implemented in assembly.
 So after two eveings of work, I decided to scrap it and start from scratch and just implement the interpreter directly. Achieving the same result, but in a lot less time and less memory usage.
+
+# Float 32 
+This interpreter uses 32 bit floats indtead of the standard integer. Which for me gives makes it more flexible.
