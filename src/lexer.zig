@@ -94,13 +94,13 @@ pub const lexer = struct {
         return error.Marker_Not_Found;
     }
 
-    fn check_if_number(line: *const []const u8) !bool {
+    fn check_if_number(line: *const []const u8) bool {
         var t_pos: usize = 0;
         while (t_pos < line.*.len and line.*[t_pos] != ' ' and line.*[t_pos] != '\n') {
             if (line.*[t_pos] == '.') {
                 t_pos += 1;
             } else if (line.*[t_pos] < '0' or line.*[t_pos] > '9') {
-                return error.Not_A_Number;
+                return false;
             } else {
                 t_pos += 1;
             }
@@ -238,7 +238,7 @@ pub const lexer = struct {
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
         const a = try self.pop();
-        if (a =§= -1) {
+        if (a == -1) {
             try self.lex(arg);
         }
         end_pos.* = new_end_pos + 5;
@@ -278,9 +278,14 @@ pub const lexer = struct {
                 try word(self);
             } else {
                 // Handle other token types or unknown tokens here
-                if (try check_if_number(&line[pos..end_pos])) {
-                    const number = try std.fmt.parseFloat(f32, token_text);
+                if (check_if_number(&line[pos..end_pos])) {
+                    const number = std.fmt.parseFloat(f32, token_text) catch {
+                        return error.Invalid_Number;
+                    };
                     try self.stack.append(number);
+                } else {
+                    std.debug.print("{s} causes an ", .{token_text});
+                    return error.Invalid_Word;
                 }
             }
 
