@@ -16,6 +16,7 @@ So after two eveings of work, I decided to scrap it and start from scratch and j
 This interpreter uses 32 bit floats indtead of the standard integer. Which for me gives makes it more flexible.
 
 ## exmaple program that calculates  the value of a resistor in kilo Ohm
+```
 : black 0 ;
 : brown 1 ;
 : red 2 ;
@@ -26,5 +27,10 @@ This interpreter uses 32 bit floats indtead of the standard integer. Which for m
 : violet 7 ;
 : grey 8 ;
 : white 9 ;
-
 : resistor rot 10 * rot + 1 rot 0 swap do 10 * loop * 1000 / . ."  Kilo Ohm" cr ;
+```
+
+usage:
+```
+brown brown red resistor
+```
