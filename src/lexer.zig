@@ -33,6 +33,9 @@ pub const lexer = struct {
         try self.immediate_words.put("swap", swap);
         try self.immediate_words.put("rot", rot);
         try self.immediate_words.put("drop", drop);
+        try self.immediate_words.put("=", equal);
+        try self.immediate_words.put(">", greater);
+        try self.immediate_words.put("<", less);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -185,6 +188,24 @@ pub const lexer = struct {
 
     fn cr(_: *lexer) !void {
         try outw.print("\n", .{});
+    }
+
+    fn equal(self: *lexer) !void {
+        const b = try self.pop();
+        const a = try self.pop();
+        try self.stack.append(if (a == b) -1 else 0);
+    }
+
+    fn greater(self: *lexer) !void {
+        const b = try self.pop();
+        const a = try self.pop();
+        try self.stack.append(if (a > b) -1 else 0);
+    }
+
+    fn less(self: *lexer) !void {
+        const b = try self.pop();
+        const a = try self.pop();
+        try self.stack.append(if (a < b) -1 else 0);
     }
 
     fn print_string(_: *lexer, line: []const u8, end_pos: *usize) !void {
