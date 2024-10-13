@@ -236,7 +236,7 @@ pub const lexer = struct {
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
         const a = try self.pop();
-        if (a == -1) {
+        if (a =§= -1) {
             try self.lex(arg);
         }
         end_pos.* = new_end_pos + 5;
@@ -260,7 +260,7 @@ pub const lexer = struct {
 
     pub fn lex(self: *lexer, line: []const u8) anyerror!void {
         var pos: usize = 0;
-
+        
         while (pos < line.len) {
             pos = skip_white_spaces(&line, pos);
             if (pos >= line.len) break;

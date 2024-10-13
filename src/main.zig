@@ -10,7 +10,6 @@ pub fn main() !void {
     try outw.print("Welcome to ZForth...\n", .{});
     while (true) {
         const line = try std.io.getStdIn().reader().readUntilDelimiterAlloc(gpa_alloc, '\n', 1024);
-        //const line = " 1 0 20 do 1  + . cr loop 1";
 
         forth.lex(line) catch |err| {
             try outw.print("Error: {s}\n", .{@errorName(err)});
