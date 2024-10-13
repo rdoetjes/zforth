@@ -1,10 +1,13 @@
 const std = @import("std");
 const outw = std.io.getStdOut().writer();
 
+const ImmediateFunction = *const fn (*lexer) anyerror!void;
+
 pub const lexer = struct {
     stack: std.ArrayList(f32),
     allocator: std.mem.Allocator,
     user_words: std.StringHashMap([]const u8),
+    immediate_words: std.StringHashMap(ImmediateFunction),
 
     pub fn init(allocator: std.mem.Allocator) !*lexer {
         const self = try allocator.create(lexer);
@@ -12,7 +15,18 @@ pub const lexer = struct {
             .stack = std.ArrayList(f32).init(allocator),
             .allocator = allocator,
             .user_words = std.StringHashMap([]const u8).init(allocator),
+            .immediate_words = std.StringHashMap(ImmediateFunction).init(allocator),
         };
+
+        try self.immediate_words.put(".", dot);
+        try self.immediate_words.put("cr", cr);
+        try self.immediate_words.put("dup", dup);
+        try self.immediate_words.put("+", add);
+        try self.immediate_words.put("*", mul);
+        try self.immediate_words.put("/", div);
+        try self.immediate_words.put(".s", dot_s);
+        try self.immediate_words.put(".S", dot_cap_s);
+
         return self;
     }
 
@@ -87,6 +101,15 @@ pub const lexer = struct {
         return a;
     }
 
+    fn dup(self: *lexer) !void {
+        if (self.stack.items.len == 0) {
+            return error.Stack_Underflow;
+        }
+        const a = self.stack.pop();
+        try self.stack.append(a);
+        try self.stack.append(a);
+    }
+
     fn add(self: *lexer) !void {
         const b = try self.pop();
         const a = try self.pop();
@@ -118,7 +141,7 @@ pub const lexer = struct {
     }
 
     fn dot(self: *lexer) !void {
-        try outw.print("{d}\n", .{try self.pop()});
+        try outw.print("{d}", .{try self.pop()});
     }
 
     fn cr(_: *lexer) !void {
@@ -173,7 +196,6 @@ pub const lexer = struct {
             // Match token
             const token_text = line[pos..end_pos];
             if (self.user_words.get(token_text)) |stmnt| {
-                std.debug.print("user_word: {s} >{s}<\n", .{ token_text, stmnt });
                 try self.lex(stmnt);
             } else if (std.mem.eql(u8, token_text, ".\"")) {
                 try print_string(self, line, &end_pos);
@@ -181,20 +203,8 @@ pub const lexer = struct {
                 try compile_word(self, line, &end_pos);
             } else if (std.mem.eql(u8, token_text, "do")) {
                 try do_number(self, line, &end_pos);
-            } else if (std.mem.eql(u8, token_text, ".")) {
-                try dot(self);
-            } else if (std.mem.eql(u8, token_text, ".s")) {
-                try dot_s(self);
-            } else if (std.mem.eql(u8, token_text, ".S")) {
-                try dot_cap_s(self);
-            } else if (std.mem.eql(u8, token_text, "cr")) {
-                try cr(self);
-            } else if (std.mem.eql(u8, token_text, "+")) {
-                try self.add();
-            } else if (std.mem.eql(u8, token_text, "*")) {
-                try self.mul();
-            } else if (std.mem.eql(u8, token_text, "/")) {
-                try self.div();
+            } else if (self.immediate_words.get(token_text)) |word| {
+                try word(self);
             } else {
                 // Handle other token types or unknown tokens here
                 if (try check_if_number(&line[pos..end_pos])) {
