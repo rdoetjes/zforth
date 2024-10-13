@@ -40,6 +40,8 @@ pub const lexer = struct {
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
         try self.compiled_words.put("do", do_number);
+        try self.compiled_words.put("if", if_then);
+
         return self;
     }
 
@@ -224,6 +226,17 @@ pub const lexer = struct {
         const b: usize = @intFromFloat(try self.pop());
         const a: usize = @intFromFloat(try self.pop());
         for (a..b) |_| {
+            try self.lex(arg);
+        }
+        end_pos.* = new_end_pos + 5;
+    }
+
+    fn if_then(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+        const new_end_pos = try find_end_marker(&line, end_pos.*, "then");
+        const start_pos = end_pos.*;
+        const arg = line[start_pos + 1 .. new_end_pos];
+        const a = try self.pop();
+        if (a == -1) {
             try self.lex(arg);
         }
         end_pos.* = new_end_pos + 5;
