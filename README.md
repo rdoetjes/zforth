@@ -12,5 +12,19 @@ When you ever need a nice partial interpreter, you can always use this one and m
 I initially started with a lexer, parser and AST, but it turned out to be a lot of work and defeating the whole purpose of Forth which was meant to be simple to be implemented in assembly.
 So after two eveings of work, I decided to scrap it and start from scratch and just implement the interpreter directly. Achieving the same result, but in a lot less time and less memory usage.
 
-# Float 32 
+## Float 32 
 This interpreter uses 32 bit floats indtead of the standard integer. Which for me gives makes it more flexible.
+
+## exmaple program that calculates  the value of a resistor in kilo Ohm
+: black 0 ;
+: brown 1 ;
+: red 2 ;
+: orange 3 ;
+: yellow 4 ;
+: green 5 ;
+: blue 6 ;
+: violet 7 ;
+: grey 8 ;
+: white 9 ;
+
+: resistor rot 10 * rot + 1 rot 0 swap do 10 * loop * 1000 / . ."  Kilo Ohm" cr ;

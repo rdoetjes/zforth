@@ -225,6 +225,11 @@ pub const lexer = struct {
 
         const b: usize = @intFromFloat(try self.pop());
         const a: usize = @intFromFloat(try self.pop());
+
+        if (a > b) {
+            return error.Loop_End_Greater_Than_Start;
+        }
+
         for (a..b) |_| {
             try self.lex(arg);
         }
