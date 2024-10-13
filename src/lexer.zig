@@ -2,12 +2,14 @@ const std = @import("std");
 const outw = std.io.getStdOut().writer();
 
 const ImmediateFunction = *const fn (*lexer) anyerror!void;
+const CompiledFunction = *const fn (*lexer, []const u8, *usize) anyerror!void;
 
 pub const lexer = struct {
     stack: std.ArrayList(f32),
     allocator: std.mem.Allocator,
     user_words: std.StringHashMap([]const u8),
     immediate_words: std.StringHashMap(ImmediateFunction),
+    compiled_words: std.StringHashMap(CompiledFunction),
 
     pub fn init(allocator: std.mem.Allocator) !*lexer {
         const self = try allocator.create(lexer);
@@ -16,6 +18,7 @@ pub const lexer = struct {
             .allocator = allocator,
             .user_words = std.StringHashMap([]const u8).init(allocator),
             .immediate_words = std.StringHashMap(ImmediateFunction).init(allocator),
+            .compiled_words = std.StringHashMap(CompiledFunction).init(allocator),
         };
 
         try self.immediate_words.put(".", dot);
@@ -27,6 +30,9 @@ pub const lexer = struct {
         try self.immediate_words.put(".s", dot_s);
         try self.immediate_words.put(".S", dot_cap_s);
 
+        try self.compiled_words.put(".\"", print_string);
+        try self.compiled_words.put(":", compile_word);
+        try self.compiled_words.put("do", do_number);
         return self;
     }
 
@@ -197,12 +203,8 @@ pub const lexer = struct {
             const token_text = line[pos..end_pos];
             if (self.user_words.get(token_text)) |stmnt| {
                 try self.lex(stmnt);
-            } else if (std.mem.eql(u8, token_text, ".\"")) {
-                try print_string(self, line, &end_pos);
-            } else if (std.mem.eql(u8, token_text, ":")) {
-                try compile_word(self, line, &end_pos);
-            } else if (std.mem.eql(u8, token_text, "do")) {
-                try do_number(self, line, &end_pos);
+            } else if (self.compiled_words.get(token_text)) |word| {
+                try word(self, line, &end_pos);
             } else if (self.immediate_words.get(token_text)) |word| {
                 try word(self);
             } else {
