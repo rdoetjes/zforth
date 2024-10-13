@@ -30,6 +30,9 @@ pub const lexer = struct {
         try self.immediate_words.put(".s", dot_s);
         try self.immediate_words.put(".S", dot_cap_s);
         try self.immediate_words.put("over", over);
+        try self.immediate_words.put("swap", swap);
+        try self.immediate_words.put("rot", rot);
+        try self.immediate_words.put("drop", drop);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -101,11 +104,32 @@ pub const lexer = struct {
     }
 
     fn over(self: *lexer) !void {
-        const b = self.stack.pop();
-        const a = self.stack.pop();
-        try self.stack.append(a);
+        const a = try self.pop();
+        const b = try self.pop();
         try self.stack.append(b);
         try self.stack.append(a);
+        try self.stack.append(b);
+    }
+
+    fn swap(self: *lexer) !void {
+        const a = try self.pop();
+        const b = try self.pop();
+        try self.stack.append(a);
+        try self.stack.append(b);
+    }
+
+    fn rot(self: *lexer) !void {
+        const a = try self.pop();
+        const b = try self.pop();
+        const c = try self.pop();
+
+        try self.stack.append(b);
+        try self.stack.append(a);
+        try self.stack.append(c);
+    }
+
+    fn drop(self: *lexer) !void {
+        _ = try self.pop();
     }
 
     fn pop(self: *lexer) !f32 {
