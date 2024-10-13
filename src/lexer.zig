@@ -29,6 +29,7 @@ pub const lexer = struct {
         try self.immediate_words.put("/", div);
         try self.immediate_words.put(".s", dot_s);
         try self.immediate_words.put(".S", dot_cap_s);
+        try self.immediate_words.put("over", over);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -97,6 +98,14 @@ pub const lexer = struct {
             }
         }
         return true;
+    }
+
+    fn over(self: *lexer) !void {
+        const b = self.stack.pop();
+        const a = self.stack.pop();
+        try self.stack.append(a);
+        try self.stack.append(b);
+        try self.stack.append(a);
     }
 
     fn pop(self: *lexer) !f32 {
