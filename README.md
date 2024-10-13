@@ -32,5 +32,6 @@ This interpreter uses 32 bit floats indtead of the standard integer. Which for m
 
 usage:
 ```
-brown brown red resistor
+brown black red resistor
+1 Kilo Ohm
 ```
