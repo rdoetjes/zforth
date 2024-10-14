@@ -28,7 +28,7 @@ This interpreter uses 32 bit floats indtead of the standard integer. Which for m
 : grey 8 ;
 : white 9 ;
 : resistor_1000s rot 10 * rot + 1 rot 0 swap do 10 * loop * ;
-: human_readible dup 999999 > if 1000000 / . ." M ohm" else dup 999 > if 1000 / . ." k Ohm" else . ." ohm" then then ;
+: human_readible dup 999999 > if 1000000 / . ." M ohm" else dup 999 > if 1000 / . ." k Ohm" else . ."  ohm" then then ;
 : resistor resistor_1000s human_readible ;
 ```
 
