@@ -38,6 +38,7 @@ pub const lexer = struct {
         try self.immediate_words.put("<", less);
         try self.immediate_words.put("loop", do_nothing);
         try self.immediate_words.put("then", do_nothing);
+        try self.immediate_words.put("else", do_nothing);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -93,7 +94,7 @@ pub const lexer = struct {
             }
             current_pos += 1;
         }
-        return line.*.len - 1;
+        return line.*.len;
     }
 
     fn check_if_number(line: *const []const u8) bool {
