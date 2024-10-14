@@ -291,6 +291,9 @@ pub const lexer = struct {
 
     fn compile_word(self: *lexer, line: []const u8, end_pos: *usize) !void {
         end_pos.* += 1;
+
+        if (end_pos.* >= line.len) return error.Marker_Not_Found;
+
         const word_end = find_end_current_token(&line, end_pos.*);
 
         const word = line[end_pos.*..word_end];
@@ -298,6 +301,7 @@ pub const lexer = struct {
         end_pos.* = word_end + 1;
 
         const definition_end = try find_end_marker(&line, end_pos.*, " ;");
+        if (definition_end >= line.len) return error.Marker_Not_Found;
         const owned_stmnt = try self.allocator.dupe(u8, line[end_pos.* .. definition_end + 1]);
 
         try self.user_words.put(owned_key, owned_stmnt);
