@@ -8,7 +8,7 @@ However, there are complete Forth implementations already available lig gforth a
 
 When you ever need a nice partial interpreter, you can always use this one and make it fit your needs. That is the charm of Forth, it can be as simple or as complex as you want it to be.
 
-## No classic Lexer, Parser, AST, Interpreter
+## No classic Lexer, Parser, AST, Interpreter (no speed ;) )
 I initially started with a lexer, parser and AST, but it turned out to be a lot of work and defeating the whole purpose of a simple Forth PoC.
 So after an evening I decided to scrap it and start from scratch and just implement the interpreter directly. Achieving the same result, but in a lot less time. However as a result it's not very fast because every iteration in a loop if the interpreter is a lot slower than an AST. But speed is not the point of this Proof of Concept, it's more about learning and understanding how Forth works and what Zig can do in the world of making interpreters. And it's also a lot more fun and easier to write than in C, I think.
 
