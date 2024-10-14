@@ -36,11 +36,14 @@ pub const lexer = struct {
         try self.immediate_words.put("=", equal);
         try self.immediate_words.put(">", greater);
         try self.immediate_words.put("<", less);
+        try self.immediate_words.put("loop", do_nothing);
+        try self.immediate_words.put("then", do_nothing);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
         try self.compiled_words.put("do", do_number);
         try self.compiled_words.put("if", if_then);
+        try self.compiled_words.put("else", else_then);
 
         return self;
     }
@@ -90,8 +93,7 @@ pub const lexer = struct {
             }
             current_pos += 1;
         }
-
-        return error.Marker_Not_Found;
+        return line.*.len - 1;
     }
 
     fn check_if_number(line: *const []const u8) bool {
@@ -107,6 +109,8 @@ pub const lexer = struct {
         }
         return true;
     }
+
+    fn do_nothing(_: *lexer) anyerror!void {}
 
     fn over(self: *lexer) !void {
         const a = try self.pop();
@@ -237,15 +241,36 @@ pub const lexer = struct {
     }
 
     fn if_then(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
-        // todo : handle else (check whether else or then comes first)
-        // if else comes first then we need to handle it as well.
-        const new_end_pos = try find_end_marker(&line, end_pos.*, "then");
+        var new_end_pos: usize = undefined;
+        const then_pos = try find_end_marker(&line, end_pos.*, "then");
+        const else_pos = find_end_marker(&line, end_pos.*, "else") catch |err| switch (err) {
+            error.Marker_Not_Found => 0,
+            else => return err,
+        };
+
+        if (else_pos == 0) new_end_pos = then_pos else new_end_pos = else_pos;
+
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
         const a = try self.pop();
+
         if (a == -1) {
             try self.lex(arg);
+            new_end_pos = then_pos;
+            end_pos.* = new_end_pos + 5;
+        } else if (else_pos != 0) {
+            end_pos.* = else_pos;
+        } else {
+            end_pos.* = new_end_pos + 5;
         }
+    }
+
+    fn else_then(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+        const new_end_pos = try find_end_marker(&line, end_pos.*, "then");
+        const start_pos = end_pos.*;
+        const arg = line[start_pos + 1 .. new_end_pos];
+
+        try self.lex(arg);
         end_pos.* = new_end_pos + 5;
     }
 
