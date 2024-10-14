@@ -13,7 +13,7 @@ I initially started with a lexer, parser and AST, but it turned out to be a lot 
 So after two eveings of work, I decided to scrap it and start from scratch and just implement the interpreter directly. Achieving the same result, but in a lot less time and less memory usage.
 
 ## Float 32 
-This interpreter uses 32 bit floats indtead of the standard integer. Which for me gives makes it more flexible.
+This interpreter uses 32 bit floats instead of the standard integer. Which for me gives makes it more flexible.
 
 ## example program that calculates  the value of a resistor in kilo Ohm
 ```
