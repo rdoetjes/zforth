@@ -35,6 +35,8 @@ pub const lexer = struct {
         try self.immediate_words.put("drop", drop);
         try self.immediate_words.put("=", equal);
         try self.immediate_words.put(">", greater);
+        try self.immediate_words.put(">=", greater_or_equal);
+        try self.immediate_words.put("<=", less_or_equal);
         try self.immediate_words.put("<", less);
         try self.immediate_words.put("loop", do_nothing);
         try self.immediate_words.put("then", do_nothing);
@@ -207,6 +209,18 @@ pub const lexer = struct {
         const b = try self.pop();
         const a = try self.pop();
         try self.stack.append(if (a > b) -1 else 0);
+    }
+
+    fn less_or_equal(self: *lexer) !void {
+        const b = try self.pop();
+        const a = try self.pop();
+        try self.stack.append(if (a <= b) -1 else 0);
+    }
+
+    fn greater_or_equal(self: *lexer) !void {
+        const b = try self.pop();
+        const a = try self.pop();
+        try self.stack.append(if (a >= b) -1 else 0);
     }
 
     fn less(self: *lexer) !void {
