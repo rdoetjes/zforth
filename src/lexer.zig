@@ -45,6 +45,7 @@ pub const lexer = struct {
         try self.immediate_words.put("else", do_nothing);
         try self.immediate_words.put("begin", do_nothing);
         try self.immediate_words.put("until", until);
+        try self.immediate_words.put("bye", exit);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -123,6 +124,10 @@ pub const lexer = struct {
     }
 
     fn do_nothing(_: *lexer) anyerror!void {}
+
+    fn exit(_: *lexer) !void {
+        std.process.exit(0);
+    }
 
     fn over(self: *lexer) !void {
         const a = try self.pop();
