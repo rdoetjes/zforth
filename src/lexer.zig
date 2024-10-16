@@ -65,6 +65,10 @@ pub const lexer = struct {
         if (pos + 1 < line.len) return line[pos + 1] else return 0;
     }
 
+    pub fn set_break_flag(self: *lexer) void {
+        self.break_flag = true;
+    }
+
     fn skip_white_spaces(line: *const []const u8, pos: usize) usize {
         var t_pos = pos;
         while (t_pos < line.*.len and (line.*[t_pos] == ' ' or line.*[t_pos] == '\n')) {
