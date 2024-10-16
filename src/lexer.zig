@@ -10,6 +10,7 @@ pub const lexer = struct {
     user_words: std.StringHashMap([]const u8),
     immediate_words: std.StringHashMap(ImmediateFunction),
     compiled_words: std.StringHashMap(CompiledFunction),
+    break_flag: bool,
 
     pub fn init(allocator: std.mem.Allocator) !*lexer {
         const self = try allocator.create(lexer);
@@ -19,6 +20,7 @@ pub const lexer = struct {
             .user_words = std.StringHashMap([]const u8).init(allocator),
             .immediate_words = std.StringHashMap(ImmediateFunction).init(allocator),
             .compiled_words = std.StringHashMap(CompiledFunction).init(allocator),
+            .break_flag = false,
         };
 
         try self.immediate_words.put(".", dot);
@@ -42,6 +44,7 @@ pub const lexer = struct {
         try self.immediate_words.put("then", do_nothing);
         try self.immediate_words.put("else", do_nothing);
         try self.immediate_words.put("begin", do_nothing);
+        try self.immediate_words.put("until", until);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -261,11 +264,19 @@ pub const lexer = struct {
         const new_end_pos = try find_end_marker(&line, end_pos.*, "begin");
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
+        self.break_flag = false;
 
-        while (true) {
+        while (!self.break_flag) {
             try self.lex(arg);
         }
         end_pos.* = new_end_pos + 5;
+    }
+
+    fn until(self: *lexer) anyerror!void {
+        const a = try self.pop();
+        if (a == -1) {
+            self.break_flag = true;
+        }
     }
 
     fn if_then(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
