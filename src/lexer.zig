@@ -41,12 +41,14 @@ pub const lexer = struct {
         try self.immediate_words.put("loop", do_nothing);
         try self.immediate_words.put("then", do_nothing);
         try self.immediate_words.put("else", do_nothing);
+        try self.immediate_words.put("begin", do_nothing);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
         try self.compiled_words.put("do", do_number);
         try self.compiled_words.put("if", if_then);
         try self.compiled_words.put("else", else_then);
+        try self.compiled_words.put("repeat", repeat);
 
         return self;
     }
@@ -250,6 +252,17 @@ pub const lexer = struct {
         }
 
         for (a..b) |_| {
+            try self.lex(arg);
+        }
+        end_pos.* = new_end_pos + 5;
+    }
+
+    fn repeat(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+        const new_end_pos = try find_end_marker(&line, end_pos.*, "begin");
+        const start_pos = end_pos.*;
+        const arg = line[start_pos + 1 .. new_end_pos];
+
+        while (true) {
             try self.lex(arg);
         }
         end_pos.* = new_end_pos + 5;
