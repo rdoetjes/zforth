@@ -15,6 +15,11 @@ So after an evening I decided to scrap it and start from scratch and just implem
 ## Float 32 
 This interpreter uses 32 bit floats instead of the standard integer. Which for me gives makes it more flexible.
 
+## example 10 print equivalent program
+```
+: 10print repeat 0 5 do ." Hello World " loop cr begin ;
+```
+
 ## example program that calculates  the value of a resistor in human readable form.
 ```
 : black 0 ;
