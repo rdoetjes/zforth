@@ -46,6 +46,7 @@ pub const lexer = struct {
         try self.immediate_words.put("begin", do_nothing);
         try self.immediate_words.put("until", until);
         try self.immediate_words.put("bye", exit);
+        try self.immediate_words.put("words", words);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -127,6 +128,22 @@ pub const lexer = struct {
 
     fn exit(_: *lexer) !void {
         std.process.exit(0);
+    }
+
+    fn words(self: *lexer) !void {
+        var iter = self.immediate_words.keyIterator();
+        while (iter.next()) |key| {
+            try outw.print("{s} ", .{key.*});
+        }
+        var iter1 = self.compiled_words.keyIterator();
+        while (iter1.next()) |key| {
+            try outw.print("{s} ", .{key.*});
+        }
+
+        var iter2 = self.user_words.keyIterator();
+        while (iter2.next()) |key| {
+            try outw.print("{s} ", .{key.*});
+        }
     }
 
     fn over(self: *lexer) !void {

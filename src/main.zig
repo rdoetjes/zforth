@@ -15,8 +15,8 @@ var sig_int_lexer: *lexer = undefined;
 
 //this is a hack, i couldn't find a way to make Zig idomatic way work on macos
 const SIGINT = 2; // Signal number for SIGINT
-fn sigint_handler(signum: i32) callconv(.C) void {
-    std.debug.print("Received SIGINT {d}\n", .{signum});
+fn sigint_handler(_: i32) callconv(.C) void {
+    std.debug.print("Breaking excution...\n", .{});
     sig_int_lexer.set_break_flag();
 }
 
@@ -28,7 +28,7 @@ pub fn main() !void {
     //this is a hack, i couldn't find a way to make Zig idomatic way work on macos
     _ = c.signal(c.SIGINT, &sigint_handler);
 
-    try outw.print("Welcome to ZForth...\n", .{});
+    try outw.print("Welcome to ZForth...\ntype bye to exit\n\n", .{});
     while (true) {
         const line = try std.io.getStdIn().reader().readUntilDelimiterAlloc(gpa_alloc, '\n', 1024);
 
