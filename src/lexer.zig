@@ -54,6 +54,7 @@ pub const lexer = struct {
         try self.compiled_words.put("if", if_then);
         try self.compiled_words.put("else", else_then);
         try self.compiled_words.put("repeat", repeat);
+        try self.compiled_words.put("see", see);
 
         return self;
     }
@@ -357,6 +358,29 @@ pub const lexer = struct {
         try self.user_words.put(owned_key, owned_stmnt);
 
         end_pos.* = definition_end + 2;
+    }
+
+    fn see(self: *lexer, line: []const u8, end_pos: *usize) !void {
+        const key = std.mem.trim(u8, line[end_pos.*..], " \t\n");
+        end_pos.* = line.len;
+
+        if (self.user_words.contains(key)) {
+            const definition: []const u8 = self.user_words.get(key) orelse "";
+            try outw.print("definition: {s}\n", .{definition});
+            return;
+        }
+
+        if (self.immediate_words.contains(key)) {
+            try outw.print("definition: {any}\n", .{self.immediate_words.get(key)});
+            return;
+        }
+
+        if (self.compiled_words.contains(key)) {
+            try outw.print("definition: {any}\n", .{self.compiled_words.get(key)});
+            return;
+        }
+
+        try outw.print("No word called {s}\n", .{key});
     }
 
     pub fn lex(self: *lexer, line: []const u8) anyerror!void {
