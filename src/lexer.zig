@@ -393,7 +393,8 @@ pub const lexer = struct {
             var end_pos = find_end_current_token(&line, pos);
 
             // Match token
-            const token_text = line[pos..end_pos];
+            const token_text = try std.ascii.allocLowerString(self.allocator, line[pos..end_pos]);
+            defer self.allocator.free(token_text);
             if (self.user_words.get(token_text)) |stmnt| {
                 try self.lex(stmnt);
             } else if (self.compiled_words.get(token_text)) |word| {
@@ -412,7 +413,6 @@ pub const lexer = struct {
                     return error.Invalid_Word;
                 }
             }
-
             pos = end_pos;
         }
     }
