@@ -220,6 +220,7 @@ pub const lexer = struct {
     }
 
     fn dot_s(self: *lexer) !void {
+        if (self.stack.items.len == 0) return error.Stack_Underflow;
         try outw.print("s {d} ", .{self.stack.items[self.stack.items.len - 1]});
     }
 
