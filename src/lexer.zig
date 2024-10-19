@@ -47,6 +47,7 @@ pub const lexer = struct {
         try self.immediate_words.put("until", until);
         try self.immediate_words.put("bye", exit);
         try self.immediate_words.put("words", words);
+        try self.immediate_words.put("emit", emit);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -262,6 +263,12 @@ pub const lexer = struct {
         try self.stack.append(if (a < b) -1 else 0);
     }
 
+    fn emit(self: *lexer) !void {
+        const a = try self.pop();
+        const char: u8 = @intFromFloat(a);
+        try outw.print("{c}", .{char});
+    }
+
     fn print_string(_: *lexer, line: []const u8, end_pos: *usize) !void {
         const new_end_pos = try find_end_marker(&line, end_pos.*, "\"");
         const start_pos = end_pos.*;
@@ -392,9 +399,15 @@ pub const lexer = struct {
             if (pos >= line.len) break;
             var end_pos = find_end_current_token(&line, pos);
 
-            // Match token
-            const token_text = try std.ascii.allocLowerString(self.allocator, line[pos..end_pos]);
+            // Match token case insensitive except for .S
+            var token_text: []const u8 = undefined;
             defer self.allocator.free(token_text);
+            if (std.mem.eql(u8, line[pos..end_pos], ".S")) {
+                token_text = try std.ascii.allocUpperString(self.allocator, line[pos..end_pos]);
+            } else {
+                token_text = try std.ascii.allocLowerString(self.allocator, line[pos..end_pos]);
+            }
+
             if (self.user_words.get(token_text)) |stmnt| {
                 try self.lex(stmnt);
             } else if (self.compiled_words.get(token_text)) |word| {
