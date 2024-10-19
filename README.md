@@ -42,3 +42,13 @@ usage:
 brown black red resistor
 1 Kilo Ohm
 ```
+
+## print text in colour
+```
+: text_color 27 emit ." [" . ." m" ;
+```
+
+usage:
+```
+31 text_color ." Hello World!"
+```
