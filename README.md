@@ -21,6 +21,9 @@ there are two forth files, namely:
 - user.fth
 These should locally be in the same directory as the interpreter. In our source tree they are symbolically linked in zig-out/bin to the respective files src/system.f and src/user.f
 
+### user.f
+This is the file that holds the definition of the user defined words. Currently there's no save from the interpreter (yet). But it would be trivial to add this. You just loop through the user_words keys and get the definition and write it to the file.
+
 ## example 10 print equivalent program
 ```
 : 10print repeat 0 5 do ." Hello World " loop cr begin ;
