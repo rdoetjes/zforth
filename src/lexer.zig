@@ -133,6 +133,7 @@ pub const lexer = struct {
     }
 
     fn words(self: *lexer) !void {
+        try outw.print("Buildin words:\n", .{});
         var iter = self.immediate_words.keyIterator();
         while (iter.next()) |key| {
             try outw.print("{s} ", .{key.*});
@@ -142,6 +143,7 @@ pub const lexer = struct {
             try outw.print("{s} ", .{key.*});
         }
 
+        try outw.print("\nExternal words:\n", .{});
         var iter2 = self.user_words.keyIterator();
         while (iter2.next()) |key| {
             try outw.print("{s} ", .{key.*});
@@ -372,12 +374,6 @@ pub const lexer = struct {
         const key = std.mem.trim(u8, line[end_pos.*..], " \t\n");
         end_pos.* = line.len;
 
-        if (self.user_words.contains(key)) {
-            const definition: []const u8 = self.user_words.get(key) orelse "";
-            try outw.print("definition: {s}\n", .{definition});
-            return;
-        }
-
         if (self.immediate_words.contains(key)) {
             try outw.print("definition: {any}\n", .{self.immediate_words.get(key)});
             return;
@@ -385,6 +381,12 @@ pub const lexer = struct {
 
         if (self.compiled_words.contains(key)) {
             try outw.print("definition: {any}\n", .{self.compiled_words.get(key)});
+            return;
+        }
+
+        if (self.user_words.contains(key)) {
+            const definition: []const u8 = self.user_words.get(key) orelse "";
+            try outw.print("definition: {s}\n", .{definition});
             return;
         }
 
