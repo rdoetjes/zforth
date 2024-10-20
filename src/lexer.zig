@@ -5,12 +5,12 @@ const ImmediateFunction = *const fn (*lexer) anyerror!void;
 const CompiledFunction = *const fn (*lexer, []const u8, *usize) anyerror!void;
 
 pub const lexer = struct {
-    stack: std.ArrayList(f32),
+    break_flag: bool,
     allocator: std.mem.Allocator,
+    stack: std.ArrayList(f32),
     user_words: std.StringHashMap([]const u8),
     immediate_words: std.StringHashMap(ImmediateFunction),
     compiled_words: std.StringHashMap(CompiledFunction),
-    break_flag: bool,
 
     pub fn init(allocator: std.mem.Allocator) !*lexer {
         const self = try allocator.create(lexer);
