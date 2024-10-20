@@ -15,6 +15,12 @@ So after an evening I decided to scrap it and start from scratch and just implem
 ## Float 32 
 This interpreter uses 32 bit floats instead of the standard integer. Which for me gives makes it more flexible.
 
+## Forth files
+there are two forth files, namely:
+- system.f
+- user.fth
+These should locally be in the same directory as the interpreter. In our source tree they are symbolically linked in zig-out/bin to the respective files src/system.f and src/user.f
+
 ## example 10 print equivalent program
 ```
 : 10print repeat 0 5 do ." Hello World " loop cr begin ;
