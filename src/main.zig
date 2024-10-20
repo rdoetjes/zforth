@@ -39,6 +39,20 @@ fn read_forth_file(forth: *lexer, file_path: []const u8) !void {
     }
 }
 
+fn read_forth_startup_files(forth: *lexer, allocator: std.mem.Allocator) !void {
+    const exe_path = try std.fs.selfExePathAlloc(allocator);
+    const exe_dir = std.fs.path.dirname(exe_path) orelse ".";
+    defer allocator.free(exe_path);
+
+    const system_path = try std.fs.path.join(allocator, &[_][]const u8{ exe_dir, "system.f" });
+    defer allocator.free(system_path);
+    const user_path = try std.fs.path.join(allocator, &[_][]const u8{ exe_dir, "user.f" });
+    defer allocator.free(user_path);
+
+    try read_forth_file(forth, system_path);
+    try read_forth_file(forth, user_path);
+}
+
 pub fn main() !void {
     const forth = try lexer.init(gpa_alloc);
     defer forth.deinit();
@@ -46,8 +60,12 @@ pub fn main() !void {
 
     //this is a hack, i couldn't find a way to make Zig idomatic way work on macos
     _ = c.signal(c.SIGINT, &sigint_handler);
-    try read_forth_file(forth, "./system.f");
-    try read_forth_file(forth, "./user.f");
+
+    read_forth_startup_files(forth, gpa_alloc) catch |err| {
+        try outw.print("Error reading forth startup files: {s}\n", .{@errorName(err)});
+        std.process.exit(1);
+    };
+
     try outw.print("Welcome to ZForth...\ntype bye to exit\n\n", .{});
     while (true) {
         const line = try std.io.getStdIn().reader().readUntilDelimiterAlloc(gpa_alloc, '\n', 1024);
