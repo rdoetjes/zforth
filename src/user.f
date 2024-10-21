@@ -15,3 +15,4 @@
 : lellow 33 text_color ;
 : 10print repeat 0 5 do ." Hello World " loop cr begin ;
 : 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
+: turnkey red blue yellow resistor ;

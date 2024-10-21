@@ -153,7 +153,6 @@ pub const Interpreter = struct {
 
     pub fn start_turn_key(self: *Interpreter) !void {
         self.break_flag = false;
-        self.stack.stack_value.clearRetainingCapacity();
         if (self.dictionary.user_words.get("turnkey")) |stmnt| {
             try self.lex(stmnt); //interpret the statement recursively
         }
