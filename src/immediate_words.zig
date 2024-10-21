@@ -38,12 +38,7 @@ fn exit(_: *Interpreter) !void {
 }
 
 fn rnd(forth: *Interpreter) !void {
-    var prng = std.rand.DefaultPrng.init(blk: {
-        var seed: u64 = undefined;
-        try std.posix.getrandom(std.mem.asBytes(&seed));
-        break :blk seed;
-    });
-    const rand = prng.random();
+    const rand = forth.prng.random();
 
     const a: u32 = @intFromFloat(try forth.stack.pop());
     const b: u32 = @intFromFloat(try forth.stack.pop());

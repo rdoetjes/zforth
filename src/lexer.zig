@@ -59,6 +59,7 @@ pub const Dictionary = struct {
 
 pub const Interpreter = struct {
     break_flag: bool,
+    prng: std.rand.DefaultPrng = undefined,
     allocator: std.mem.Allocator,
     stack: Stack,
     dictionary: Dictionary,
@@ -96,6 +97,11 @@ pub const Interpreter = struct {
             .allocator = allocator,
             .dictionary = Dictionary.init(allocator),
             .break_flag = false,
+            .prng = std.rand.DefaultPrng.init(blk: {
+                var seed: u64 = undefined;
+                try std.posix.getrandom(std.mem.asBytes(&seed));
+                break :blk seed;
+            }),
         };
 
         try immediate_words.initImmediateWords(self);
