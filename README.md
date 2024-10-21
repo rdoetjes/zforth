@@ -25,9 +25,38 @@ We currently just support single line words -- just to keep things simple for ed
 ### user.f
 This is the file that holds the definition of the user defined words. Currently there's no save from the interpreter (yet). But it would be trivial to add this. You just loop through the user_words keys and get the definition and write it to the file.
 
+# Examples
+
 ## example 10 print equivalent program
 ```
 : 10print repeat 0 5 do ." Hello World " loop cr begin ;
+```
+
+## print text in colour
+```
+: text_color 27 emit ." [" . ." m" ;
+```
+
+usage:
+```
+31 text_color ." Hello World!"
+```
+
+
+## random numbers
+There's a a random number generator word in this implemetation. 
+It takes two arguments from the stack (begin number and end number) and returns a random number between those two numbers, including the begin and end number.
+
+```
+0 30 rnd .
+```
+
+Will generate a number  between 0 and 30 (including 0 and 30).
+
+## example 10 print with colours
+```
+: text_color 27 emit ." [" . ." m" ;
+: 10print repeat 30 38 rnd text_color ." Hello world " begin ;
 ```
 
 ## example program that calculates  the value of a resistor in human readable form.
@@ -51,14 +80,4 @@ usage:
 ```
 brown black red resistor
 1 Kilo Ohm
-```
-
-## print text in colour
-```
-: text_color 27 emit ." [" . ." m" ;
-```
-
-usage:
-```
-31 text_color ." Hello World!"
 ```
