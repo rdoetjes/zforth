@@ -56,7 +56,7 @@ fn read_forth_startup_files(forth: *Interpreter, allocator: std.mem.Allocator) !
 pub fn main() !void {
     const forth = try Interpreter.init(gpa_alloc);
     defer forth.deinit();
-    sig_int_Interpreter = forth;
+    sig_int_interpreter = forth;
 
     //this is a hack, i couldn't find a way to make Zig idomatic way work on macos
     _ = c.signal(c.SIGINT, &sigint_handler);
