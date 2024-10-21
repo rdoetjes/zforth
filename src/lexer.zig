@@ -48,6 +48,7 @@ pub const lexer = struct {
         try self.immediate_words.put("bye", exit);
         try self.immediate_words.put("words", words);
         try self.immediate_words.put("emit", emit);
+        try self.immediate_words.put("rnd", rnd);
 
         try self.compiled_words.put(".\"", print_string);
         try self.compiled_words.put(":", compile_word);
@@ -130,6 +131,20 @@ pub const lexer = struct {
 
     fn exit(_: *lexer) !void {
         std.process.exit(0);
+    }
+
+    fn rnd(self: *lexer) !void {
+        var prng = std.rand.DefaultPrng.init(blk: {
+            var seed: u64 = undefined;
+            try std.posix.getrandom(std.mem.asBytes(&seed));
+            break :blk seed;
+        });
+        const rand = prng.random();
+
+        const a: u32 = @intFromFloat(try self.pop());
+        const b: u32 = @intFromFloat(try self.pop());
+        const result = rand.intRangeAtMost(u32, b, a);
+        try self.stack.append(@floatFromInt(result));
     }
 
     fn words(self: *lexer) !void {
