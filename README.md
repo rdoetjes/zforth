@@ -80,7 +80,7 @@ The colors are the standard ANSI escape codes with the color codes 30-38.
 : 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
 ```
 
-## makeing 10printcolor 'turnkey'
+## making 10printcolor 'turnkey'
 The following code will make the 10printcolor word the turnkey word and will be called when the interpreter starts.
 ```
 : turnkey 10printcolor ;
