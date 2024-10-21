@@ -15,6 +15,14 @@ So after an evening I decided to scrap it and start from scratch and just implem
 ## Float 32 
 This interpreter uses 32 bit floats instead of the standard integer. Which for me gives makes it more flexible.
 
+## Single line words
+This interpreter only supports single line words. This is merely a limitation of the repl, when the repl would strip \n from the input, it would allow you to write multi line words. But for educational purposes it's better to keep it simple and small.
+As an added benefit, it makes writing smaller more readable code.
+
+## No remarks inplemented ( yet )
+Remarks are not implemented yet, since it wouldn't help with the single line words implementation that is currently in place.
+Therefore ( ) and \ are not implemented yet.
+
 ## Forth files
 there are two forth files, namely:
 - system.f
