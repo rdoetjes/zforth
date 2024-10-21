@@ -26,9 +26,12 @@ Therefore ( ) and \ are not implemented yet.
 ## Forth files
 there are two forth files, namely:
 - system.f
-- user.fth
+- user.f
 These should locally be in the same directory as the interpreter. In our source tree they are symbolically linked in zig-out/bin to the respective files src/system.f and src/user.f
 We currently just support single line words -- just to keep things simple for education purposes.
+
+### system.f
+This is the file that holds the definition of the system words that are build up from the compiled_words and immediate words. Words like 2dup and 2drop are defined in the system.f file.
 
 ### user.f
 This is the file that holds the definition of the user defined words. Currently there's no save from the interpreter (yet). But it would be trivial to add this. You just loop through the user_words keys and get the definition and write it to the file.
