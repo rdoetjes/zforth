@@ -109,18 +109,18 @@ fn see(forth: *Interpreter, line: []const u8, end_pos: *usize) !void {
     end_pos.* = line.len;
 
     if (forth.dictionary.immediate_words.contains(key)) {
-        try outw.print("definition: {any}\n", .{forth.dictionary.immediate_words.get(key)});
+        try outw.print(" :\n : {s} {any} ;", .{ key, forth.dictionary.immediate_words.get(key) });
         return;
     }
 
     if (forth.dictionary.compiled_words.contains(key)) {
-        try outw.print("definition: {any}\n", .{forth.dictionary.compiled_words.get(key)});
+        try outw.print(" :\n : {s} {any} ;", .{ key, forth.dictionary.compiled_words.get(key) });
         return;
     }
 
     if (forth.dictionary.user_words.contains(key)) {
         const definition: []const u8 = forth.dictionary.user_words.get(key) orelse "";
-        try outw.print("definition: {s}\n", .{definition});
+        try outw.print(" : {s} {s} ;\n", .{ key, definition });
         return;
     }
 
