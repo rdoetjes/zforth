@@ -7,20 +7,20 @@ const c = @cImport({
 
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 var gpa_alloc = gpa.allocator();
-const lexer = @import("lexer.zig").lexer;
+const Interpreter = @import("lexer.zig").Interpreter;
 const builtin = @import("builtin");
 
 const outw = std.io.getStdOut().writer();
-var sig_int_lexer: *lexer = undefined;
+var sig_int_Interpreter: *Interpreter = undefined;
 
 //this is a hack, i couldn't find a way to make Zig idomatic way work on macos
 const SIGINT = 2; // Signal number for SIGINT
 fn sigint_handler(_: i32) callconv(.C) void {
     std.debug.print("Breaking excution...\n", .{});
-    sig_int_lexer.set_break_flag();
+    sig_int_Interpreter.set_break_flag();
 }
 
-fn read_forth_file(forth: *lexer, file_path: []const u8) !void {
+fn read_forth_file(forth: *Interpreter, file_path: []const u8) !void {
     var file = std.fs.cwd().openFile(file_path, .{}) catch |err| {
         try outw.print("Error open forth file {s}: {s}\n", .{ file_path, @errorName(err) });
         std.process.exit(1);
@@ -39,7 +39,7 @@ fn read_forth_file(forth: *lexer, file_path: []const u8) !void {
     }
 }
 
-fn read_forth_startup_files(forth: *lexer, allocator: std.mem.Allocator) !void {
+fn read_forth_startup_files(forth: *Interpreter, allocator: std.mem.Allocator) !void {
     const exe_path = try std.fs.selfExePathAlloc(allocator);
     const exe_dir = std.fs.path.dirname(exe_path) orelse ".";
     defer allocator.free(exe_path);
@@ -54,9 +54,9 @@ fn read_forth_startup_files(forth: *lexer, allocator: std.mem.Allocator) !void {
 }
 
 pub fn main() !void {
-    const forth = try lexer.init(gpa_alloc);
+    const forth = try Interpreter.init(gpa_alloc);
     defer forth.deinit();
-    sig_int_lexer = forth;
+    sig_int_Interpreter = forth;
 
     //this is a hack, i couldn't find a way to make Zig idomatic way work on macos
     _ = c.signal(c.SIGINT, &sigint_handler);

@@ -1,76 +1,125 @@
 const std = @import("std");
 const outw = std.io.getStdOut().writer();
 
-const ImmediateFunction = *const fn (*lexer) anyerror!void;
-const CompiledFunction = *const fn (*lexer, []const u8, *usize) anyerror!void;
+const ImmediateFunction = *const fn (*Interpreter) anyerror!void;
+const CompiledFunction = *const fn (*Interpreter, []const u8, *usize) anyerror!void;
 
-pub const lexer = struct {
-    break_flag: bool,
-    allocator: std.mem.Allocator,
-    stack: std.ArrayList(f32),
+pub const Stack = struct {
+    stack_value: std.ArrayList(f32),
+
+    pub fn init(allocator: std.mem.Allocator) Stack {
+        return .{ .stack_value = std.ArrayList(f32).init(allocator) };
+    }
+
+    pub fn deinit(self: *Stack) void {
+        self.stack_value.deinit();
+    }
+
+    pub fn len(self: *Stack) usize {
+        return self.stack_value.items.len;
+    }
+
+    // Add methods like push, pop, peek, etc.
+    fn pop(self: *Stack) !f32 {
+        if (self.stack_value.items.len == 0) {
+            return error.Stack_Underflow;
+        }
+        const a = self.stack_value.pop();
+        return a;
+    }
+
+    fn append(self: *Stack, float: f32) !void {
+        try self.stack_value.append(float);
+        return;
+    }
+};
+
+pub const Dictionary = struct {
     user_words: std.StringHashMap([]const u8),
     immediate_words: std.StringHashMap(ImmediateFunction),
     compiled_words: std.StringHashMap(CompiledFunction),
 
-    pub fn init(allocator: std.mem.Allocator) !*lexer {
-        const self = try allocator.create(lexer);
-        self.* = .{
-            .stack = std.ArrayList(f32).init(allocator),
-            .allocator = allocator,
+    pub fn init(allocator: std.mem.Allocator) Dictionary {
+        return .{
             .user_words = std.StringHashMap([]const u8).init(allocator),
             .immediate_words = std.StringHashMap(ImmediateFunction).init(allocator),
             .compiled_words = std.StringHashMap(CompiledFunction).init(allocator),
+        };
+    }
+
+    pub fn deinit(self: *Dictionary) void {
+        self.user_words.deinit();
+        self.immediate_words.deinit();
+        self.compiled_words.deinit();
+    }
+
+    // Add methods for adding and looking up words
+};
+
+pub const Interpreter = struct {
+    break_flag: bool,
+    allocator: std.mem.Allocator,
+    stack: Stack,
+    dictionary: Dictionary,
+
+    pub fn init(allocator: std.mem.Allocator) !*Interpreter {
+        const self = try allocator.create(Interpreter);
+        self.* = .{
+            .stack = Stack.init(allocator),
+            .allocator = allocator,
+            .dictionary = Dictionary.init(allocator),
             .break_flag = false,
         };
 
-        try self.immediate_words.put(".", dot);
-        try self.immediate_words.put("cr", cr);
-        try self.immediate_words.put("dup", dup);
-        try self.immediate_words.put("+", add);
-        try self.immediate_words.put("*", mul);
-        try self.immediate_words.put("/", div);
-        try self.immediate_words.put(".s", dot_s);
-        try self.immediate_words.put(".S", dot_cap_s);
-        try self.immediate_words.put("over", over);
-        try self.immediate_words.put("swap", swap);
-        try self.immediate_words.put("rot", rot);
-        try self.immediate_words.put("drop", drop);
-        try self.immediate_words.put("=", equal);
-        try self.immediate_words.put(">", greater);
-        try self.immediate_words.put(">=", greater_or_equal);
-        try self.immediate_words.put("<=", less_or_equal);
-        try self.immediate_words.put("<", less);
-        try self.immediate_words.put("loop", do_nothing);
-        try self.immediate_words.put("then", do_nothing);
-        try self.immediate_words.put("else", do_nothing);
-        try self.immediate_words.put("begin", do_nothing);
-        try self.immediate_words.put("until", until);
-        try self.immediate_words.put("bye", exit);
-        try self.immediate_words.put("words", words);
-        try self.immediate_words.put("emit", emit);
-        try self.immediate_words.put("rnd", rnd);
+        try self.dictionary.immediate_words.put(".", dot);
+        try self.dictionary.immediate_words.put("cr", cr);
+        try self.dictionary.immediate_words.put("dup", dup);
+        try self.dictionary.immediate_words.put("+", add);
+        try self.dictionary.immediate_words.put("*", mul);
+        try self.dictionary.immediate_words.put("/", div);
+        try self.dictionary.immediate_words.put(".s", dot_s);
+        try self.dictionary.immediate_words.put(".S", dot_cap_s);
+        try self.dictionary.immediate_words.put("over", over);
+        try self.dictionary.immediate_words.put("swap", swap);
+        try self.dictionary.immediate_words.put("rot", rot);
+        try self.dictionary.immediate_words.put("drop", drop);
+        try self.dictionary.immediate_words.put("=", equal);
+        try self.dictionary.immediate_words.put(">", greater);
+        try self.dictionary.immediate_words.put(">=", greater_or_equal);
+        try self.dictionary.immediate_words.put("<=", less_or_equal);
+        try self.dictionary.immediate_words.put("<", less);
+        try self.dictionary.immediate_words.put("loop", do_nothing);
+        try self.dictionary.immediate_words.put("then", do_nothing);
+        try self.dictionary.immediate_words.put("else", do_nothing);
+        try self.dictionary.immediate_words.put("begin", do_nothing);
+        try self.dictionary.immediate_words.put("until", until);
+        try self.dictionary.immediate_words.put("bye", exit);
+        try self.dictionary.immediate_words.put("words", words);
+        try self.dictionary.immediate_words.put("emit", emit);
+        try self.dictionary.immediate_words.put("rnd", rnd);
 
-        try self.compiled_words.put(".\"", print_string);
-        try self.compiled_words.put(":", compile_word);
-        try self.compiled_words.put("do", do_number);
-        try self.compiled_words.put("if", if_then);
-        try self.compiled_words.put("else", else_then);
-        try self.compiled_words.put("repeat", repeat);
-        try self.compiled_words.put("see", see);
+        try self.dictionary.compiled_words.put(".\"", print_string);
+        try self.dictionary.compiled_words.put(":", compile_word);
+        try self.dictionary.compiled_words.put("do", do_number);
+        try self.dictionary.compiled_words.put("if", if_then);
+        try self.dictionary.compiled_words.put("else", else_then);
+        try self.dictionary.compiled_words.put("repeat", repeat);
+        try self.dictionary.compiled_words.put("see", see);
 
         return self;
     }
 
-    pub fn deinit(self: *lexer) void {
+    pub fn deinit(self: *Interpreter) void {
         self.stack.deinit();
-        std.heap.page_allocator.destroy(self);
+        self.dictionary.deinit();
+        self.allocator.destroy(self);
     }
 
     fn peek(line: []const u8, pos: usize) u8 {
         if (pos + 1 < line.len) return line[pos + 1] else return 0;
     }
 
-    pub fn set_break_flag(self: *lexer) void {
+    pub fn set_break_flag(self: *Interpreter) void {
         self.break_flag = true;
     }
 
@@ -127,13 +176,13 @@ pub const lexer = struct {
         return true;
     }
 
-    fn do_nothing(_: *lexer) anyerror!void {}
+    fn do_nothing(_: *Interpreter) anyerror!void {}
 
-    fn exit(_: *lexer) !void {
+    fn exit(_: *Interpreter) !void {
         std.process.exit(0);
     }
 
-    fn rnd(self: *lexer) !void {
+    fn rnd(self: *Interpreter) !void {
         var prng = std.rand.DefaultPrng.init(blk: {
             var seed: u64 = undefined;
             try std.posix.getrandom(std.mem.asBytes(&seed));
@@ -141,152 +190,144 @@ pub const lexer = struct {
         });
         const rand = prng.random();
 
-        const a: u32 = @intFromFloat(try self.pop());
-        const b: u32 = @intFromFloat(try self.pop());
+        const a: u32 = @intFromFloat(try self.stack.pop());
+        const b: u32 = @intFromFloat(try self.stack.pop());
         const result = rand.intRangeAtMost(u32, b, a);
         try self.stack.append(@floatFromInt(result));
     }
 
-    fn words(self: *lexer) !void {
+    fn words(self: *Interpreter) !void {
         try outw.print("Buildin words:\n", .{});
-        var iter = self.immediate_words.keyIterator();
+        var iter = self.dictionary.immediate_words.keyIterator();
         while (iter.next()) |key| {
             try outw.print("{s} ", .{key.*});
         }
-        var iter1 = self.compiled_words.keyIterator();
+        var iter1 = self.dictionary.compiled_words.keyIterator();
         while (iter1.next()) |key| {
             try outw.print("{s} ", .{key.*});
         }
 
         try outw.print("\nExternal words:\n", .{});
-        var iter2 = self.user_words.keyIterator();
+        var iter2 = self.dictionary.user_words.keyIterator();
         while (iter2.next()) |key| {
             try outw.print("{s} ", .{key.*});
         }
     }
 
-    fn over(self: *lexer) !void {
-        const a = try self.pop();
-        const b = try self.pop();
+    fn over(self: *Interpreter) !void {
+        const a = try self.stack.pop();
+        const b = try self.stack.pop();
         try self.stack.append(b);
         try self.stack.append(a);
         try self.stack.append(b);
     }
 
-    fn swap(self: *lexer) !void {
-        const a = try self.pop();
-        const b = try self.pop();
+    fn swap(self: *Interpreter) !void {
+        const a = try self.stack.pop();
+        const b = try self.stack.pop();
         try self.stack.append(a);
         try self.stack.append(b);
     }
 
-    fn rot(self: *lexer) !void {
-        const a = try self.pop();
-        const b = try self.pop();
-        const c = try self.pop();
+    fn rot(self: *Interpreter) !void {
+        const a = try self.stack.pop();
+        const b = try self.stack.pop();
+        const c = try self.stack.pop();
 
         try self.stack.append(b);
         try self.stack.append(a);
         try self.stack.append(c);
     }
 
-    fn drop(self: *lexer) !void {
-        _ = try self.pop();
+    fn drop(self: *Interpreter) !void {
+        _ = try self.stack.pop();
     }
 
-    fn pop(self: *lexer) !f32 {
-        if (self.stack.items.len == 0) {
+    fn dup(self: *Interpreter) !void {
+        if (self.stack.stack_value.items.len == 0) {
             return error.Stack_Underflow;
         }
-        const a = self.stack.pop();
-        return a;
-    }
-
-    fn dup(self: *lexer) !void {
-        if (self.stack.items.len == 0) {
-            return error.Stack_Underflow;
-        }
-        const a = self.stack.pop();
+        const a = try self.stack.pop();
         try self.stack.append(a);
         try self.stack.append(a);
     }
 
-    fn add(self: *lexer) !void {
-        const b = try self.pop();
-        const a = try self.pop();
+    fn add(self: *Interpreter) !void {
+        const b = try self.stack.pop();
+        const a = try self.stack.pop();
         try self.stack.append(a + b);
     }
 
-    fn mul(self: *lexer) !void {
-        const a = try self.pop();
-        const b = try self.pop();
+    fn mul(self: *Interpreter) !void {
+        const a = try self.stack.pop();
+        const b = try self.stack.pop();
         try self.stack.append(a * b);
     }
 
-    fn div(self: *lexer) !void {
-        const b = try self.pop();
-        const a = try self.pop();
+    fn div(self: *Interpreter) !void {
+        const b = try self.stack.pop();
+        const a = try self.stack.pop();
         try self.stack.append(a / b);
     }
 
-    fn dot_cap_s(self: *lexer) !void {
-        try outw.print("S <{d}> ", .{self.stack.items.len});
-        for (self.stack.items) |item| {
+    fn dot_cap_s(self: *Interpreter) !void {
+        try outw.print("S <{d}> ", .{self.stack.stack_value.items.len});
+        for (self.stack.stack_value.items) |item| {
             try outw.print("{d} ", .{item});
         }
         try outw.print("\n", .{});
     }
 
-    fn dot_s(self: *lexer) !void {
-        if (self.stack.items.len == 0) return error.Stack_Underflow;
-        try outw.print("s {d} ", .{self.stack.items[self.stack.items.len - 1]});
+    fn dot_s(self: *Interpreter) !void {
+        if (self.stack.stack_value.items.len == 0) return error.Stack_Underflow;
+        try outw.print("s {d} ", .{self.stack.stack_value.items[self.stack.stack_value.items.len - 1]});
     }
 
-    fn dot(self: *lexer) !void {
-        try outw.print("{d}", .{try self.pop()});
+    fn dot(self: *Interpreter) !void {
+        try outw.print("{d}", .{try self.stack.pop()});
     }
 
-    fn cr(_: *lexer) !void {
+    fn cr(_: *Interpreter) !void {
         try outw.print("\n", .{});
     }
 
-    fn equal(self: *lexer) !void {
-        const b = try self.pop();
-        const a = try self.pop();
+    fn equal(self: *Interpreter) !void {
+        const b = try self.stack.pop();
+        const a = try self.stack.pop();
         try self.stack.append(if (a == b) -1 else 0);
     }
 
-    fn greater(self: *lexer) !void {
-        const b = try self.pop();
-        const a = try self.pop();
+    fn greater(self: *Interpreter) !void {
+        const b = try self.stack.pop();
+        const a = try self.stack.pop();
         try self.stack.append(if (a > b) -1 else 0);
     }
 
-    fn less_or_equal(self: *lexer) !void {
-        const b = try self.pop();
-        const a = try self.pop();
+    fn less_or_equal(self: *Interpreter) !void {
+        const b = try self.stack.pop();
+        const a = try self.stack.pop();
         try self.stack.append(if (a <= b) -1 else 0);
     }
 
-    fn greater_or_equal(self: *lexer) !void {
-        const b = try self.pop();
-        const a = try self.pop();
+    fn greater_or_equal(self: *Interpreter) !void {
+        const b = try self.stack.pop();
+        const a = try self.stack.pop();
         try self.stack.append(if (a >= b) -1 else 0);
     }
 
-    fn less(self: *lexer) !void {
-        const b = try self.pop();
-        const a = try self.pop();
+    fn less(self: *Interpreter) !void {
+        const b = try self.stack.pop();
+        const a = try self.stack.pop();
         try self.stack.append(if (a < b) -1 else 0);
     }
 
-    fn emit(self: *lexer) !void {
-        const a = try self.pop();
+    fn emit(self: *Interpreter) !void {
+        const a = try self.stack.pop();
         const char: u8 = @intFromFloat(a);
         try outw.print("{c}", .{char});
     }
 
-    fn print_string(_: *lexer, line: []const u8, end_pos: *usize) !void {
+    fn print_string(_: *Interpreter, line: []const u8, end_pos: *usize) !void {
         const new_end_pos = try find_end_marker(&line, end_pos.*, "\"");
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
@@ -294,13 +335,13 @@ pub const lexer = struct {
         end_pos.* = new_end_pos + 1;
     }
 
-    fn do_number(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+    fn do_number(self: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
         const new_end_pos = try find_end_marker(&line, end_pos.*, "loop");
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
 
-        const b: usize = @intFromFloat(try self.pop());
-        const a: usize = @intFromFloat(try self.pop());
+        const b: usize = @intFromFloat(try self.stack.pop());
+        const a: usize = @intFromFloat(try self.stack.pop());
 
         if (a > b) {
             return error.Loop_End_Greater_Than_Start;
@@ -312,7 +353,7 @@ pub const lexer = struct {
         end_pos.* = new_end_pos + 5;
     }
 
-    fn repeat(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+    fn repeat(self: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
         const new_end_pos = try find_end_marker(&line, end_pos.*, "begin");
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
@@ -324,14 +365,14 @@ pub const lexer = struct {
         end_pos.* = new_end_pos + 5;
     }
 
-    fn until(self: *lexer) anyerror!void {
-        const a = try self.pop();
+    fn until(self: *Interpreter) anyerror!void {
+        const a = try self.stack.pop();
         if (a == -1) {
             self.break_flag = true;
         }
     }
 
-    fn if_then(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+    fn if_then(self: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
         var new_end_pos: usize = undefined;
         const then_pos = try find_end_marker(&line, end_pos.*, "then");
         const else_pos = find_end_marker(&line, end_pos.*, "else") catch |err| switch (err) {
@@ -343,7 +384,7 @@ pub const lexer = struct {
 
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
-        const a = try self.pop();
+        const a = try self.stack.pop();
 
         if (a == -1) {
             try self.lex(arg);
@@ -356,7 +397,7 @@ pub const lexer = struct {
         }
     }
 
-    fn else_then(self: *lexer, line: []const u8, end_pos: *usize) anyerror!void {
+    fn else_then(self: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
         const new_end_pos = try find_end_marker(&line, end_pos.*, "then");
         const start_pos = end_pos.*;
         const arg = line[start_pos + 1 .. new_end_pos];
@@ -365,7 +406,7 @@ pub const lexer = struct {
         end_pos.* = new_end_pos + 5;
     }
 
-    fn compile_word(self: *lexer, line: []const u8, end_pos: *usize) !void {
+    fn compile_word(self: *Interpreter, line: []const u8, end_pos: *usize) !void {
         end_pos.* += 1;
 
         if (end_pos.* >= line.len) return error.Marker_Not_Found;
@@ -380,27 +421,27 @@ pub const lexer = struct {
         if (definition_end >= line.len) return error.Marker_Not_Found;
         const owned_stmnt = try self.allocator.dupe(u8, line[end_pos.* .. definition_end + 1]);
 
-        try self.user_words.put(owned_key, owned_stmnt);
+        try self.dictionary.user_words.put(owned_key, owned_stmnt);
 
         end_pos.* = definition_end + 2;
     }
 
-    fn see(self: *lexer, line: []const u8, end_pos: *usize) !void {
+    fn see(self: *Interpreter, line: []const u8, end_pos: *usize) !void {
         const key = std.mem.trim(u8, line[end_pos.*..], " \t\n");
         end_pos.* = line.len;
 
-        if (self.immediate_words.contains(key)) {
-            try outw.print("definition: {any}\n", .{self.immediate_words.get(key)});
+        if (self.dictionary.immediate_words.contains(key)) {
+            try outw.print("definition: {any}\n", .{self.dictionary.immediate_words.get(key)});
             return;
         }
 
-        if (self.compiled_words.contains(key)) {
-            try outw.print("definition: {any}\n", .{self.compiled_words.get(key)});
+        if (self.dictionary.compiled_words.contains(key)) {
+            try outw.print("definition: {any}\n", .{self.dictionary.compiled_words.get(key)});
             return;
         }
 
-        if (self.user_words.contains(key)) {
-            const definition: []const u8 = self.user_words.get(key) orelse "";
+        if (self.dictionary.user_words.contains(key)) {
+            const definition: []const u8 = self.dictionary.user_words.get(key) orelse "";
             try outw.print("definition: {s}\n", .{definition});
             return;
         }
@@ -408,7 +449,7 @@ pub const lexer = struct {
         try outw.print("No word called {s}\n", .{key});
     }
 
-    pub fn lex(self: *lexer, line: []const u8) anyerror!void {
+    pub fn lex(self: *Interpreter, line: []const u8) anyerror!void {
         var pos: usize = 0;
 
         while (pos < line.len) {
@@ -425,11 +466,11 @@ pub const lexer = struct {
                 token_text = try std.ascii.allocLowerString(self.allocator, line[pos..end_pos]);
             }
 
-            if (self.user_words.get(token_text)) |stmnt| {
+            if (self.dictionary.user_words.get(token_text)) |stmnt| {
                 try self.lex(stmnt);
-            } else if (self.compiled_words.get(token_text)) |word| {
+            } else if (self.dictionary.compiled_words.get(token_text)) |word| {
                 try word(self, line, &end_pos);
-            } else if (self.immediate_words.get(token_text)) |word| {
+            } else if (self.dictionary.immediate_words.get(token_text)) |word| {
                 try word(self);
             } else {
                 // Handle other token types or unknown tokens here
