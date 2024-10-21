@@ -63,6 +63,32 @@ pub const Interpreter = struct {
     stack: Stack,
     dictionary: Dictionary,
 
+    fn peek(line: []const u8, pos: usize) u8 {
+        if (pos + 1 < line.len) return line[pos + 1] else return 0;
+    }
+
+    fn skip_white_spaces(line: *const []const u8, pos: usize) usize {
+        var t_pos = pos;
+        while (t_pos < line.*.len and (line.*[t_pos] == ' ' or line.*[t_pos] == '\n')) {
+            t_pos += 1;
+        }
+        return t_pos;
+    }
+
+    fn check_if_number(line: *const []const u8) bool {
+        var t_pos: usize = 0;
+        while (t_pos < line.*.len and line.*[t_pos] != ' ' and line.*[t_pos] != '\n') {
+            if (line.*[t_pos] == '.') {
+                t_pos += 1;
+            } else if (line.*[t_pos] < '0' or line.*[t_pos] > '9') {
+                return false;
+            } else {
+                t_pos += 1;
+            }
+        }
+        return true;
+    }
+
     pub fn init(allocator: std.mem.Allocator) !*Interpreter {
         const self = try allocator.create(Interpreter);
         self.* = .{
@@ -84,20 +110,8 @@ pub const Interpreter = struct {
         self.allocator.destroy(self);
     }
 
-    fn peek(line: []const u8, pos: usize) u8 {
-        if (pos + 1 < line.len) return line[pos + 1] else return 0;
-    }
-
     pub fn set_break_flag(self: *Interpreter) void {
         self.break_flag = true;
-    }
-
-    fn skip_white_spaces(line: *const []const u8, pos: usize) usize {
-        var t_pos = pos;
-        while (t_pos < line.*.len and (line.*[t_pos] == ' ' or line.*[t_pos] == '\n')) {
-            t_pos += 1;
-        }
-        return t_pos;
     }
 
     pub fn find_end_current_token(line: *const []const u8, pos: usize) usize {
@@ -129,20 +143,6 @@ pub const Interpreter = struct {
             current_pos += 1;
         }
         return line.*.len;
-    }
-
-    fn check_if_number(line: *const []const u8) bool {
-        var t_pos: usize = 0;
-        while (t_pos < line.*.len and line.*[t_pos] != ' ' and line.*[t_pos] != '\n') {
-            if (line.*[t_pos] == '.') {
-                t_pos += 1;
-            } else if (line.*[t_pos] < '0' or line.*[t_pos] > '9') {
-                return false;
-            } else {
-                t_pos += 1;
-            }
-        }
-        return true;
     }
 
     pub fn start_turn_key(self: *Interpreter) !void {
