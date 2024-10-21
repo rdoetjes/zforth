@@ -62,15 +62,7 @@ pub const Interpreter = struct {
     stack: Stack,
     dictionary: Dictionary,
 
-    pub fn init(allocator: std.mem.Allocator) !*Interpreter {
-        const self = try allocator.create(Interpreter);
-        self.* = .{
-            .stack = Stack.init(allocator),
-            .allocator = allocator,
-            .dictionary = Dictionary.init(allocator),
-            .break_flag = false,
-        };
-
+    fn initImmediateWords(self: *Interpreter) !void {
         try self.dictionary.immediate_words.put(".", dot);
         try self.dictionary.immediate_words.put("cr", cr);
         try self.dictionary.immediate_words.put("dup", dup);
@@ -97,7 +89,9 @@ pub const Interpreter = struct {
         try self.dictionary.immediate_words.put("words", words);
         try self.dictionary.immediate_words.put("emit", emit);
         try self.dictionary.immediate_words.put("rnd", rnd);
+    }
 
+    fn initCompiledWords(self: *Interpreter) !void {
         try self.dictionary.compiled_words.put(".\"", print_string);
         try self.dictionary.compiled_words.put(":", compile_word);
         try self.dictionary.compiled_words.put("do", do_number);
@@ -105,6 +99,19 @@ pub const Interpreter = struct {
         try self.dictionary.compiled_words.put("else", else_then);
         try self.dictionary.compiled_words.put("repeat", repeat);
         try self.dictionary.compiled_words.put("see", see);
+    }
+
+    pub fn init(allocator: std.mem.Allocator) !*Interpreter {
+        const self = try allocator.create(Interpreter);
+        self.* = .{
+            .stack = Stack.init(allocator),
+            .allocator = allocator,
+            .dictionary = Dictionary.init(allocator),
+            .break_flag = false,
+        };
+
+        try self.initImmediateWords();
+        try self.initCompiledWords();
 
         return self;
     }
