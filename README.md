@@ -1,5 +1,5 @@
 # ZFORTH
-Zorth is a partial Forth interpreter written in Zig, it has been created as a teaching tool to teach Zig and Forth.
+ZForth is a partial Forth interpreter written in Zig, it has been created as a teaching tool to teach Zig and Forth.
 
 ## Partial features
 There's only a small subset of the Forth language implemented. Enough to create some simple programs and understand the basics.
