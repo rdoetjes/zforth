@@ -36,11 +36,19 @@ This is the file that holds the definition of the user defined words. Currently 
 # Examples
 
 ## example 10 print equivalent program
+Your typical:
+10 print "Hello World!";
+20 goto 10
+
+program in forth:
+
 ```
 : 10print repeat 0 5 do ." Hello World " loop cr begin ;
 ```
 
 ## print text in colour
+This is a simple word that sets the text to a certain ansii colour. The colours are defined by the ANSI escape codes and these codes are in the range of 30-38. Where 0 text_color would set the colour back to the standard colour (white).
+
 ```
 : text_color 27 emit ." [" . ." m" ;
 ```
@@ -61,12 +69,18 @@ It takes two arguments from the stack (begin number and end number) and returns 
 Will generate a number  between 0 and 30 (including 0 and 30).
 
 ## example 10 print with colours
+The following example prints hello world in random colours.
+The colors are the standard ANSI escape codes with the color codes 30-38.
+
 ```
 : text_color 27 emit ." [" . ." m" ;
 : 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
 ```
 
 ## example program that calculates  the value of a resistor in human readable form.
+The following code wil calculate the value of a resistor in human readable form based on the colors you enter in the REPL, which are in turn translated to their value between (0-9) depending on the color.
+These 3 values on the stack are used to calculate the value of the resistor in M Ohms, K Ohms or ohms depending on their size.
+
 ```
 : black 0 ;
 : brown 1 ;
