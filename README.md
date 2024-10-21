@@ -42,7 +42,6 @@ usage:
 31 text_color ." Hello World!"
 ```
 
-
 ## random numbers
 There's a a random number generator word in this implemetation. 
 It takes two arguments from the stack (begin number and end number) and returns a random number between those two numbers, including the begin and end number.
@@ -56,7 +55,7 @@ Will generate a number  between 0 and 30 (including 0 and 30).
 ## example 10 print with colours
 ```
 : text_color 27 emit ." [" . ." m" ;
-: 10print repeat 30 38 rnd text_color ." Hello world " begin ;
+: 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
 ```
 
 ## example program that calculates  the value of a resistor in human readable form.

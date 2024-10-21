@@ -13,4 +13,5 @@
 : resistor_in_human_readible_form 32 text_color dup 1000000 >= if 1000000 / . ." M ohm" else dup 1000 >= if 1000 / . ." k Ohm" else . ."  ohm" then then 0 text_color ;
 : resistor resistor_in_ohms resistor_in_human_readible_form ;
 : lellow 33 text_color ;
-: 10print repeat 30 38 rnd text_color ." Hello world " begin ;
+: 10print repeat 0 5 do ." Hello World " loop cr begin ;
+: 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
