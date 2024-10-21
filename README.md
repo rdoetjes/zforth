@@ -33,6 +33,9 @@ We currently just support single line words -- just to keep things simple for ed
 ### user.f
 This is the file that holds the definition of the user defined words. Currently there's no save from the interpreter (yet). But it would be trivial to add this. You just loop through the user_words keys and get the definition and write it to the file.
 
+### turnkey word
+The turnkey word is a special word that is automatically started when the interpreter starts. So one can simply define the word turnkey and call your word and it will be called when the interpreter starts.
+
 # Examples
 
 ## example 10 print equivalent program
@@ -76,6 +79,13 @@ The colors are the standard ANSI escape codes with the color codes 30-38.
 : text_color 27 emit ." [" . ." m" ;
 : 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
 ```
+
+## makeing 10printcolor 'turnkey'
+The following code will make the 10printcolor word the turnkey word and will be called when the interpreter starts.
+```
+: turnkey 10printcolor ;
+```
+Now exit the Forth interpreter and start it again and it will print hello world in random colours. CTRL-C will bring continue the interpreter in the REPL loop.
 
 ## example program that calculates  the value of a resistor in human readable form.
 The following code wil calculate the value of a resistor in human readable form based on the colors you enter in the REPL, which are in turn translated to their value between (0-9) depending on the color.

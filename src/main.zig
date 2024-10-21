@@ -67,6 +67,8 @@ pub fn main() !void {
     };
 
     try outw.print("Welcome to ZForth...\ntype bye to exit\n\n", .{});
+    try forth.start_turn_key();
+
     while (true) {
         const line = try std.io.getStdIn().reader().readUntilDelimiterAlloc(gpa_alloc, '\n', 1024);
 

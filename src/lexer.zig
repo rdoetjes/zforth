@@ -145,6 +145,14 @@ pub const Interpreter = struct {
         return true;
     }
 
+    pub fn start_turn_key(self: *Interpreter) !void {
+        self.break_flag = false;
+        self.stack.stack_value.clearRetainingCapacity();
+        if (self.dictionary.user_words.get("turnkey")) |stmnt| {
+            try self.lex(stmnt); //interpret the statement recursively
+        }
+    }
+
     pub fn lex(self: *Interpreter, line: []const u8) anyerror!void {
         var pos: usize = 0;
 
