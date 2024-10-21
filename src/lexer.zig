@@ -163,7 +163,7 @@ pub const Interpreter = struct {
             }
 
             if (self.dictionary.user_words.get(token_text)) |stmnt| {
-                try self.lex(stmnt);
+                try self.lex(stmnt); //interpret the statement recursively
             } else if (self.dictionary.compiled_words.get(token_text)) |word| {
                 try word(self, line, &end_pos);
             } else if (self.dictionary.immediate_words.get(token_text)) |word| {
