@@ -36,6 +36,7 @@ pub fn initImmediateWords(forth: *Interpreter) !void {
     try forth.dictionary.immediate_words.put(">>", shr_bitwise);
     try forth.dictionary.immediate_words.put("rol", rol_bitwise);
     try forth.dictionary.immediate_words.put("ror", ror_bitwise);
+    try forth.dictionary.immediate_words.put("ms", ms);
 }
 
 fn do_nothing(_: *Interpreter) anyerror!void {}
@@ -236,4 +237,9 @@ fn until(forth: *Interpreter) anyerror!void {
     if (a == -1) {
         forth.break_flag = true;
     }
+}
+
+fn ms(forth: *Interpreter) !void {
+    const a = try forth.stack.pop();
+    std.time.sleep(@as(u64, @intFromFloat(a)) * std.time.ns_per_ms);
 }

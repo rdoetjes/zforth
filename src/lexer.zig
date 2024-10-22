@@ -161,6 +161,7 @@ pub const Interpreter = struct {
         }
     }
 
+    // TODO: run this in own thread, that way sig_int can terminate the whole thread instead of now waitin in the repeat loop
     pub fn lex(self: *Interpreter, line: []const u8) anyerror!void {
         var pos: usize = 0;
 
