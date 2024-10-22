@@ -29,9 +29,59 @@ pub fn initImmediateWords(forth: *Interpreter) !void {
     try forth.dictionary.immediate_words.put("words", words);
     try forth.dictionary.immediate_words.put("emit", emit);
     try forth.dictionary.immediate_words.put("rnd", rnd);
+    try forth.dictionary.immediate_words.put("&", and_bitwise);
+    try forth.dictionary.immediate_words.put("|", or_bitwise);
+    try forth.dictionary.immediate_words.put("^", xor_bitwise);
+    try forth.dictionary.immediate_words.put("<<", shl_bitwise);
+    try forth.dictionary.immediate_words.put(">>", shr_bitwise);
+    try forth.dictionary.immediate_words.put("rol", rol_bitwise);
+    try forth.dictionary.immediate_words.put("ror", ror_bitwise);
 }
 
 fn do_nothing(_: *Interpreter) anyerror!void {}
+
+fn and_bitwise(forth: *Interpreter) !void {
+    const b: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    const a: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    try forth.stack.append(@as(f32, @floatFromInt(a & b)));
+}
+fn or_bitwise(forth: *Interpreter) !void {
+    const b: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    const a: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    try forth.stack.append(@as(f32, @floatFromInt(a | b)));
+}
+
+fn xor_bitwise(forth: *Interpreter) !void {
+    const b: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    const a: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    try forth.stack.append(@as(f32, @floatFromInt(a ^ b)));
+}
+
+fn shl_bitwise(forth: *Interpreter) !void {
+    const b: u5 = @as(u5, @intFromFloat(try forth.stack.pop()));
+    const a: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    try forth.stack.append(@as(f32, @floatFromInt(a << b)));
+}
+
+fn shr_bitwise(forth: *Interpreter) !void {
+    const b: u5 = @as(u5, @intFromFloat(try forth.stack.pop()));
+    const a: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    try forth.stack.append(@as(f32, @floatFromInt(a >> b)));
+}
+
+fn rol_bitwise(forth: *Interpreter) !void {
+    const b: u5 = @as(u5, @intFromFloat(try forth.stack.pop()));
+    const a: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    const result = std.math.rotl(u32, a, b);
+    try forth.stack.append(@as(f32, @floatFromInt(result)));
+}
+
+fn ror_bitwise(forth: *Interpreter) !void {
+    const b: u5 = @as(u5, @intFromFloat(try forth.stack.pop()));
+    const a: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
+    const result = std.math.rotr(u32, a, b);
+    try forth.stack.append(@as(f32, @floatFromInt(result)));
+}
 
 fn exit(_: *Interpreter) !void {
     std.process.exit(0);
