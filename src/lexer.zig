@@ -59,6 +59,7 @@ pub const Dictionary = struct {
 
 pub const Interpreter = struct {
     break_flag: bool,
+    sig_int: bool,
     prng: std.rand.DefaultPrng = undefined,
     allocator: std.mem.Allocator,
     stack: Stack,
@@ -97,6 +98,7 @@ pub const Interpreter = struct {
             .allocator = allocator,
             .dictionary = Dictionary.init(allocator),
             .break_flag = false,
+            .sig_int = false,
             .prng = std.rand.DefaultPrng.init(blk: {
                 var seed: u64 = undefined;
                 try std.posix.getrandom(std.mem.asBytes(&seed));
@@ -116,8 +118,8 @@ pub const Interpreter = struct {
         self.allocator.destroy(self);
     }
 
-    pub fn set_break_flag(self: *Interpreter) void {
-        self.break_flag = true;
+    pub fn set_sigint_flag(self: *Interpreter) void {
+        self.sig_int = true;
     }
 
     pub fn find_end_current_token(line: *const []const u8, pos: usize) usize {
@@ -153,6 +155,7 @@ pub const Interpreter = struct {
 
     pub fn start_turn_key(self: *Interpreter) !void {
         self.break_flag = false;
+        self.sig_int = false;
         if (self.dictionary.user_words.get("turnkey")) |stmnt| {
             try self.lex(stmnt); //interpret the statement recursively
         }

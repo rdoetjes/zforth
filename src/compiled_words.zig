@@ -39,15 +39,16 @@ fn do_number(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!vo
 }
 
 fn repeat(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
-    const new_end_pos = try Interpreter.find_end_marker(&line, end_pos.*, "begin");
+    const new_end_pos = try Interpreter.find_end_marker(&line, end_pos.*, ";");
     const start_pos = end_pos.*;
     const arg = line[start_pos + 1 .. new_end_pos];
     forth.break_flag = false;
+    forth.sig_int = false;
 
-    while (!forth.break_flag) {
+    while (!forth.break_flag and !forth.sig_int) {
         try forth.lex(arg);
     }
-    end_pos.* = new_end_pos + 5;
+    end_pos.* = new_end_pos;
 }
 
 fn if_then(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {

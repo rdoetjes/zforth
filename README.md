@@ -115,3 +115,9 @@ usage:
 brown black red resistor
 1 Kilo Ohm
 ```
+## KnightRider scanner (on console)
+```
+: kitt_up repeat 1 rol .s dup 128 = until  ;
+: kitt_down repeat 1 ror .s dup 1 = until  ;
+: knight_rider_scanner 1 repeat kitt_up kitt_down begin ;
+```

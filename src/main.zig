@@ -17,7 +17,7 @@ var sig_int_interpreter: *Interpreter = undefined;
 const SIGINT = 2; // Signal number for SIGINT
 fn sigint_handler(_: i32) callconv(.C) void {
     std.debug.print("Breaking excution...\n", .{});
-    sig_int_interpreter.set_break_flag();
+    sig_int_interpreter.set_sigint_flag();
 }
 
 fn read_forth_file(forth: *Interpreter, file_path: []const u8) !void {

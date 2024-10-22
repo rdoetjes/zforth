@@ -23,7 +23,7 @@ pub fn initImmediateWords(forth: *Interpreter) !void {
     try forth.dictionary.immediate_words.put("loop", do_nothing);
     try forth.dictionary.immediate_words.put("then", do_nothing);
     try forth.dictionary.immediate_words.put("else", do_nothing);
-    try forth.dictionary.immediate_words.put("begin", do_nothing);
+    try forth.dictionary.immediate_words.put("begin", begin);
     try forth.dictionary.immediate_words.put("until", until);
     try forth.dictionary.immediate_words.put("bye", exit);
     try forth.dictionary.immediate_words.put("words", words);
@@ -39,6 +39,10 @@ pub fn initImmediateWords(forth: *Interpreter) !void {
 }
 
 fn do_nothing(_: *Interpreter) anyerror!void {}
+
+fn begin(forth: *Interpreter) anyerror!void {
+    forth.break_flag = false;
+}
 
 fn and_bitwise(forth: *Interpreter) !void {
     const b: u32 = @as(u32, @intFromFloat(try forth.stack.pop()));
