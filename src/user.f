@@ -15,6 +15,6 @@
 : lellow 33 text_color ;
 : 10print repeat 0 5 do ." Hello World " loop cr begin ;
 : 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
-: kitt_up repeat 1 rol 50 ms .s dup 128 = until ;
-: kitt_down repeat 1 ror 50 ms .s dup 1 = until ;
+: kitt_up repeat 1 rol 20 ms .s dup 128 = until ;
+: kitt_down repeat 1 ror 20 ms .s dup 1 = until ;
 : kitt 1 repeat kitt_up cr kitt_down cr begin ;
