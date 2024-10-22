@@ -44,7 +44,7 @@ fn repeat(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void 
     const arg = line[start_pos + 1 .. new_end_pos];
     forth.break_flag = false;
     forth.sig_int = false;
-    std.debug.print("{s}\n", .{arg});
+
     while (!forth.break_flag and !forth.sig_int) {
         try forth.lex(arg);
     }
