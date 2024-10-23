@@ -19,7 +19,7 @@ This interpreter uses 32 bit floats instead of the standard integer. Which for m
 This interpreter only supports single line words. This is merely a limitation of the repl, when the repl would strip \n from the input, it would allow you to write multi line words. But for educational purposes it's better to keep it simple and small.
 As an added benefit, it makes writing smaller more readable code.
 
-### No remarks i,plemented ( yet )
+### No remarks implemented ( yet )
 Remarks are not implemented yet, since it wouldn't help with the single line words implementation that is currently in place.
 Therefore ( ) and \ are not implemented yet.
 
@@ -65,7 +65,7 @@ usage:
 ```
 
 ## random numbers
-There's a a random number generator word in this implemetation. 
+There's a random number generator word in this implemetation. 
 It takes two arguments from the stack (begin number and end number) and returns a random number between those two numbers, including the begin and end number.
 
 ```forth
@@ -73,6 +73,18 @@ It takes two arguments from the stack (begin number and end number) and returns 
 ```
 
 Will generate a number  between 0 and 30 (including 0 and 30).
+
+## delays
+There's a ms word that takes the top number from the stack and waits that amount of milliseconds.
+
+```
+: wait 10000 ms ." You will see this after 10 seccond" cr ;
+```
+
+Usage:
+```forth
+wait
+```
 
 ## example 10 print with colours
 The following example prints hello world in random colours.
