@@ -121,8 +121,8 @@ This is a simple knight rider scanner that uses the rol and ror words to shift t
 If LEDs were connected to the bits of the 16 bit register, this would be a simple knight rider scanner.
 
 ```
-: kitt_up repeat 1 rol .s dup 128 = until  ;
-: kitt_down repeat 1 ror .s dup 1 = until  ;
+: kitt_up repeat 1 rol .s dup 128 = until cr ;
+: kitt_down repeat 1 ror .s dup 1 = until cr ;
 : knight_rider_scanner 1 repeat kitt_up kitt_down begin ;
 ```
 
