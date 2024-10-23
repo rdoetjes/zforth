@@ -123,10 +123,10 @@ If LEDs were connected to the bits of the 16 bit register, this would be a simpl
 ```
 : kitt_up repeat 1 rol .s dup 128 = until cr ;
 : kitt_down repeat 1 ror .s dup 1 = until cr ;
-: knight_rider_scanner 1 repeat kitt_up kitt_down begin ;
+: kitt 1 repeat kitt_up kitt_down begin ;
 ```
 
 usage:
 ```
-knight_rider_scanner
+kitt
 ```
