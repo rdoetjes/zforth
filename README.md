@@ -122,7 +122,7 @@ If LEDs were connected to the bits of the 16 bit register, this would be a simpl
 
 We use a 20 ms time out for each step in the pattern.
 
-```
+```forth
 : kitt_up repeat 1 rol 20 ms dup . ."  " dup 32768 = until ;
 : kitt_down repeat 1 ror 20 ms dup . ."  " dup 1 = until cr ;
 : kitt 1 repeat kitt_up kitt_down begin ;
