@@ -10,6 +10,7 @@ pub fn initCompiledWords(interpreter: *Interpreter) !void {
     try interpreter.dictionary.compiled_words.put("else", else_then);
     try interpreter.dictionary.compiled_words.put("repeat", repeat);
     try interpreter.dictionary.compiled_words.put("see", see);
+    try interpreter.dictionary.compiled_words.put("begin", begin);
 }
 
 fn print_string(_: *Interpreter, line: []const u8, end_pos: *usize) !void {
@@ -18,6 +19,11 @@ fn print_string(_: *Interpreter, line: []const u8, end_pos: *usize) !void {
     const arg = line[start_pos + 1 .. new_end_pos];
     try outw.print("{s}", .{arg});
     end_pos.* = new_end_pos + 1;
+}
+
+fn begin(forth: *Interpreter, _: []const u8, end_pos: *usize) anyerror!void {
+    if (forth.sig_int) return;
+    end_pos.* = 0;
 }
 
 fn do_number(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
@@ -39,7 +45,9 @@ fn do_number(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!vo
 }
 
 fn repeat(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
-    const new_end_pos = try Interpreter.find_end_marker(&line, end_pos.*, ";");
+    const new_end_pos_begin = try Interpreter.find_end_marker(&line, end_pos.*, "begin");
+    const new_end_pos_until = try Interpreter.find_end_marker(&line, end_pos.*, "until");
+    const new_end_pos = if (new_end_pos_begin > new_end_pos_until) new_end_pos_until + 5 else new_end_pos_begin;
     const start_pos = end_pos.*;
     const arg = line[start_pos + 1 .. new_end_pos];
     forth.break_flag = false;
@@ -50,7 +58,6 @@ fn repeat(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void 
     }
     end_pos.* = new_end_pos;
 }
-
 fn if_then(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
     var new_end_pos: usize = undefined;
     const then_pos = try Interpreter.find_end_marker(&line, end_pos.*, "then");
