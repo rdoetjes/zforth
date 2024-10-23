@@ -21,9 +21,13 @@ fn print_string(_: *Interpreter, line: []const u8, end_pos: *usize) !void {
     end_pos.* = new_end_pos + 1;
 }
 
-fn begin(forth: *Interpreter, _: []const u8, end_pos: *usize) anyerror!void {
-    if (forth.sig_int) return;
+fn begin(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
+    if (forth.sig_int) {
+        end_pos.* = end_pos.* + 1;
+        return;
+    }
     end_pos.* = 0;
+    end_pos.* = try Interpreter.find_end_marker(&line, end_pos.*, "repeat");
 }
 
 fn do_number(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
