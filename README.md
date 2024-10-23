@@ -117,8 +117,8 @@ brown black red resistor
 ```
 
 ## KnightRider scanner (on console)
-This is a simple knight rider scanner that uses the rol and ror words to shift the bits of the 32 bit register.
-If LEDs were connected to the bits of the 32 bit register, this would be a simple knight rider scanner.
+This is a simple knight rider scanner that uses the rol and ror words to shift the bits of the 16 bit register.
+If LEDs were connected to the bits of the 16 bit register, this would be a simple knight rider scanner.
 
 ```
 : kitt_up repeat 1 rol .s dup 128 = until  ;
