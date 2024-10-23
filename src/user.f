@@ -19,6 +19,6 @@
 
 : 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
 
-: kitt_up repeat 1 rol 20 ms dup . ."  " dup 32768 = until cr ;
+: kitt_up repeat 1 rol 20 ms dup . ."  " dup 32768 = until ;
 : kitt_down repeat 1 ror 20 ms dup . ."  " dup 1 = until cr ;
 : kitt 1 repeat kitt_up kitt_down begin ;
