@@ -144,3 +144,48 @@ usage:
 ```forth
 kitt
 ```
+
+## Word list
+|word|description|
+|---|---|
+|<<|shift bits left for the top item on the stack|
+|>>|shift bits right for the top item on the stack|
+|rol|rotate bits left for the top item on the stack|
+|ror|rotate bits right for the top item on the stack|
+|.|pop and print the top item on the stack|
+|.s|print the top item on stack without popping it|
+|.S|print the stack without popping it|
+|." |print the string between the quotes|
+|=|compare the top two items on the stack retuns 0 if not equal -1 if equal|
+|<|compare the top two items on the stack retuns 0 if larger -1 if smaller|
+|>|compare the top two items on the stack retuns 0 if smaller -1 if larger|
+|+|add the top two items on the stack|
+|-|subtract the top two items on the stack|
+|*|multiply the top two items on the stack|
+|/|divide the top two items on the stack|
+|&|bitwise and the top two items on the stack|
+|^|bitwise xor the top two items on the stack|
+|\||bitwise or the top item on the stack|
+|emit|emit the top item on the stack as a character|
+|cr|print a newline|
+|dup|duplicate the top item on the stack|
+|2dup|duplicate the top two items on the stack|
+|drop|drop the top item on the stack|
+|2drop|drop the top two items on the stack|
+|over|copy the second item on the stack to the top of the stack|
+|swap|swap the top two items on the stack|
+|rnd|generate a random number between the two top values (inclusive) of the stack|
+|ms|wait for the top item on the stack in milliseconds|
+|if|if the top item on the stack is not 0, execute the next word|
+|else|if the top item on the stack is 0, execute the next word|
+|then|end the if statement|
+|repeat|repeat the next word(s) depending on the end word being begin (loops forever) or until (loops until if statement is met)
+|begin|ends a repeat loop|
+|bye|exits the interpreter|
+|words|print all words in the word lists|
+|see|print the definition of the word coming after it|
+
+
+words then = over dup * swap | >= else / .S & ms <= ^ rot loop bye rol >> . cr .s + drop > < emit ror until rnd do if see begin ." : else repeat 
+External words:
+10print kitt_down kitt wait text_color 10printcolor red brown violet 2drop green resistor kitt_up yellow resistor_in_human_readible_form lellow black resistor_in_ohms 2over blue grey white orange 2dup  ok
