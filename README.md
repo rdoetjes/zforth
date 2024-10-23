@@ -159,6 +159,8 @@ kitt
 |=|compare the top two items on the stack retuns 0 if not equal -1 if equal|
 |<|compare the top two items on the stack retuns 0 if larger -1 if smaller|
 |>|compare the top two items on the stack retuns 0 if smaller -1 if larger|
+|<=|compare the top two items on the stack retuns 0 if not smaller or equal and -1 if smaller or equal|
+|>=|compare the top two items on the stack retuns 0 if not larger or equal and -1 if larger or equal|
 |+|add the top two items on the stack|
 |-|subtract the top two items on the stack|
 |*|multiply the top two items on the stack|
