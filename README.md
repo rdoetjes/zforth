@@ -48,19 +48,19 @@ Your typical:
 
 program in forth:
 
-```
+```forth
 : 10print repeat 0 5 do ." Hello World " loop cr begin ;
 ```
 
 ## print text in colour
 This is a simple word that sets the text to a certain ansii colour. The colours are defined by the ANSI escape codes and these codes are in the range of 30-38. Where 0 text_color would set the colour back to the standard colour (white).
 
-```
+```forth
 : text_color 27 emit ." [" . ." m" ;
 ```
 
 usage:
-```
+```forth
 31 text_color ." Hello World!"
 ```
 
@@ -68,7 +68,7 @@ usage:
 There's a a random number generator word in this implemetation. 
 It takes two arguments from the stack (begin number and end number) and returns a random number between those two numbers, including the begin and end number.
 
-```
+```forth
 0 30 rnd .
 ```
 
@@ -78,7 +78,7 @@ Will generate a number  between 0 and 30 (including 0 and 30).
 The following example prints hello world in random colours.
 The colors are the standard ANSI escape codes with the color codes 30-38.
 
-```
+```forth
 : text_color 27 emit ." [" . ." m" ;
 : 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
 ```
@@ -94,7 +94,7 @@ Now exit the Forth interpreter and start it again and it will print hello world 
 The following code wil calculate the value of a resistor in human readable form based on the colors you enter in the REPL, which are in turn translated to their value between (0-9) depending on the color.
 These 3 values on the stack are used to calculate the value of the resistor in M Ohms, K Ohms or ohms depending on their size.
 
-```
+```forth
 : black 0 ;
 : brown 1 ;
 : red 2 ;
@@ -111,7 +111,7 @@ These 3 values on the stack are used to calculate the value of the resistor in M
 ```
 
 usage:
-```
+```forth
 brown black red resistor
 1 Kilo Ohm
 ```
@@ -129,6 +129,6 @@ We use a 20 ms time out for each step in the pattern.
 ```
 
 usage:
-```
+```forth
 kitt
 ```
