@@ -78,7 +78,7 @@ Will generate a number  between 0 and 30 (including 0 and 30).
 There's a ms word that takes the top number from the stack and waits that amount of milliseconds.
 
 ```
-: wait 10000 ms ." You will see this after 10 seccond" cr ;
+: wait 10000 ms ." You will see this after 10 seconds" cr ;
 ```
 
 Usage:
