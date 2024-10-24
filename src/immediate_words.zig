@@ -90,8 +90,8 @@ fn exit(_: *Interpreter) !void {
 fn rnd(forth: *Interpreter) !void {
     const rand = forth.prng.random();
 
-    const a: u32 = @intFromFloat(try forth.stack.pop());
     const b: u32 = @intFromFloat(try forth.stack.pop());
+    const a: u32 = @intFromFloat(try forth.stack.pop());
     const result = rand.intRangeAtMost(u32, b, a);
     try forth.stack.append(@floatFromInt(result));
 }

@@ -92,7 +92,7 @@ The colors are the standard ANSI escape codes with the color codes 30-38.
 
 ```forth
 : text_color 27 emit ." [" . ." m" ;
-: 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
+: 10printcolor repeat 38 30 rnd text_color ." Hello world " begin ;
 ```
 
 ## making 10printcolor 'turnkey'

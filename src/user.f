@@ -17,7 +17,7 @@
 
 : 10print repeat 5 0 do ." Hello World " loop cr begin ;
 
-: 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
+: 10printcolor repeat 38 30 rnd text_color ." Hello world " begin ;
 
 : bin16 1 16 0 do dup rot over over & rot = if ." 1" else ." 0" then swap 1 rol loop 2drop cr ;
 : kitt_up repeat 1 rol 30 ms dup 27 emit ." [10;10f" bin16 dup 32768 = until ;
