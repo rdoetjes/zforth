@@ -35,8 +35,8 @@ fn do_number(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!vo
     const start_pos = end_pos.*;
     const arg = line[start_pos + 1 .. new_end_pos];
 
-    const b: usize = @intFromFloat(try forth.stack.pop());
     const a: usize = @intFromFloat(try forth.stack.pop());
+    const b: usize = @intFromFloat(try forth.stack.pop());
 
     if (a > b) {
         return error.Loop_End_Greater_Than_Start;

@@ -15,10 +15,11 @@
 
 : lellow 33 text_color ;
 
-: 10print repeat 0 5 do ." Hello World " loop cr begin ;
+: 10print repeat 5 0 do ." Hello World " loop cr begin ;
 
 : 10printcolor repeat 30 38 rnd text_color ." Hello world " begin ;
 
-: kitt_up repeat 1 rol 20 ms dup . ."  " dup 32768 = until ;
-: kitt_down repeat 1 ror 20 ms dup . ."  " dup 1 = until cr ;
+: bin16 1 16 0 do dup rot over over & rot = if ." 1" else ." 0" then swap 1 rol loop 2drop cr ;
+: kitt_up repeat 1 rol 20 ms dup bin16 dup 32768 = until ;
+: kitt_down repeat 1 ror 20 ms dup bin16 dup 1 = until ;
 : kitt 1 repeat kitt_up kitt_down begin ;
