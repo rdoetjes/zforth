@@ -43,6 +43,9 @@ fn do_number(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!vo
     }
 
     for (a..b) |_| {
+        if (forth.break_flag or forth.sig_int) {
+            break;
+        }
         try forth.lex(arg);
     }
     end_pos.* = new_end_pos + 5;
