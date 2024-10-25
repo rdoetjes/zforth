@@ -62,6 +62,7 @@ fn repeat(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void 
     }
     end_pos.* = new_end_pos;
 }
+
 fn if_then(forth: *Interpreter, line: []const u8, end_pos: *usize) anyerror!void {
     var new_end_pos: usize = undefined;
     const then_pos = try Interpreter.find_end_marker(&line, end_pos.*, "then");
