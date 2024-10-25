@@ -16,7 +16,7 @@ var sig_int_interpreter: *Interpreter = undefined;
 //this is a hack, i couldn't find a way to make Zig idomatic way work on macos
 const SIGINT = 2; // Signal number for SIGINT
 fn sigint_handler(_: i32) callconv(.C) void {
-    std.debug.print("Breaking excution...\n", .{});
+    std.debug.print("Breaking execution...\n", .{});
     sig_int_interpreter.set_sigint_flag();
 }
 
