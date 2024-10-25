@@ -132,7 +132,7 @@ brown black red resistor
 This is a simple knight rider scanner that uses the rol and ror words to shift the bits of the 16 bit register.
 If LEDs were connected to the bits of the 16 bit register, this would be a simple knight rider scanner.
 
-We use a 20 ms time out for each step in the pattern.
+We use a 30 ms time out for each step in the pattern.
 
 ```forth
 : bin16 1 16 0 do dup rot over over & rot = if ." 1" else ." 0" then swap 1 rol loop 2drop cr ;
