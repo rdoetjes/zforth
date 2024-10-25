@@ -173,6 +173,7 @@ pub const Interpreter = struct {
             // Match token case insensitive except for .S
             var token_text: []const u8 = undefined;
             defer self.allocator.free(token_text);
+
             if (std.mem.eql(u8, line[pos..end_pos], ".S")) {
                 token_text = try std.ascii.allocUpperString(self.allocator, line[pos..end_pos]);
             } else {

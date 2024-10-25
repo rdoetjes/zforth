@@ -7,6 +7,7 @@ pub fn initImmediateWords(forth: *Interpreter) !void {
     try forth.dictionary.immediate_words.put("cr", cr);
     try forth.dictionary.immediate_words.put("dup", dup);
     try forth.dictionary.immediate_words.put("+", add);
+    try forth.dictionary.immediate_words.put("-", sub);
     try forth.dictionary.immediate_words.put("*", mul);
     try forth.dictionary.immediate_words.put("/", div);
     try forth.dictionary.immediate_words.put(".s", dot_s);
@@ -156,6 +157,12 @@ fn add(forth: *Interpreter) !void {
     const b = try forth.stack.pop();
     const a = try forth.stack.pop();
     try forth.stack.append(a + b);
+}
+
+fn sub(forth: *Interpreter) !void {
+    const b = try forth.stack.pop();
+    const a = try forth.stack.pop();
+    try forth.stack.append(a - b);
 }
 
 fn mul(forth: *Interpreter) !void {
